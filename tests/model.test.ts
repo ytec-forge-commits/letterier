@@ -1,5 +1,7 @@
 import { expect, test } from 'vitest';
 import { newProject, bodyText, replaceRange, formatRange, paperSize, type FloatingObject } from '../src/core/model';
+import {applyBodyFont} from '../src/core/text-format';
+import {compose} from '../src/core/compose';
 
 test('文書設定がA4実寸と縦横で入れ替わる', () => {
   const p = newProject();
@@ -32,4 +34,19 @@ test('本文追従アンカーは前方の編集へ追従しページ固定は�
 test('改行・手動改ページも本文位置を持ち削除して戻せる', () => {
   const p=replaceRange(newProject(),0,0,'あ\nい\fう');
   expect(bodyText(replaceRange(p,3,4,''))).toBe('あ\nいう');
+});
+test('指定ページの本文だけへフォントを一括適用する',()=>{
+  const p=replaceRange(newProject(),0,0,'第一頁\f第二頁');
+  const layout=compose(p,()=>5);
+  const next=applyBodyFont(p,'Klee One',{scope:'page',pageIndex:1,layout});
+  expect(next.body.runs.map(run=>[run.text,run.style.fontFamily??''])).toEqual([
+    ['第一頁\f',''],['第二頁','Klee One'],
+  ]);
+  expect(next.baseStyle.fontFamily).toBe(p.baseStyle.fontFamily);
+});
+test('全ページの本文と標準フォントを同じフォントへ揃える',()=>{
+  const p=replaceRange(newProject(),0,0,'本文');p.body.runs=[{text:'本',style:{fontFamily:'Yomogi'}},{text:'文',style:{}}];
+  const next=applyBodyFont(p,'Klee One',{scope:'all'});
+  expect(next.baseStyle.fontFamily).toBe('Klee One');
+  expect(next.body.runs).toEqual([{text:'本文',style:{fontFamily:'Klee One'}}]);
 });

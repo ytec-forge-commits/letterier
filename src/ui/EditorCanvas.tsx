@@ -4,7 +4,7 @@ import { graphemes } from '../core/layout';
 import { type Layout } from '../core/compose';
 import { LineContent, PageArtwork } from './Paper';
 import { ObjectLayer } from './ObjectLayer';
-import {moveBlockCaret} from '../core/caret';
+import {moveBlockCaret,pickCaretCandidate} from '../core/caret';
 
 export interface TextSelection { start:number; end:number }
 interface Props { currentStyle:TextStyle;project:Project;layout:Layout;zoom:number;selection:TextSelection;caretRequest:number;onSelection:(value:TextSelection)=>void;onInsert:(start:number,end:number,text:string)=>void;onHistory:(redo:boolean)=>void;onFormat:(style:Partial<TextStyle>)=>void;onPage:(page:number)=>void;selectedObject?:string|null;onSelectObject?:(id:string)=>void;onObjectPreview?:(id:string,patch:Partial<FloatingObject>|null)=>void;onObjectChange?:(id:string,patch:Partial<FloatingObject>)=>void;onObjectDelete?:(id:string)=>void }
@@ -33,6 +33,7 @@ export function readSelection():TextSelection|null {
 export function EditorCanvas(props:Props) {
   const root=useRef<HTMLDivElement>(null), composing=useRef(false), compositionRange=useRef<TextSelection|null>(null);
   const compositionFinal=useRef<string|null>(null);
+  const preferTextEnd=useRef<number|null>(null);
   const preferredInline=useRef<number|undefined>(undefined);
   const restore=(rangeSelection:TextSelection=props.selection,backward=false,focusPage?:number,focusLine?:number)=>{
     if(!root.current||composing.current) return;
@@ -40,7 +41,9 @@ export function EditorCanvas(props:Props) {
     const point=(offset:number,isFocus:boolean)=>{
       const pageNodes=focusPage===undefined||!isFocus?nodes:nodes.filter(n=>n.closest('.page-edit')?.getAttribute('aria-label')===`手紙の本文 ${focusPage+1}ページ`);
       const lineNodes=focusLine===undefined||!isFocus?pageNodes:pageNodes.filter(n=>(n.closest('.body-line') as HTMLElement|null)?.dataset.lineIndex===String(focusLine));
-      const node=lineNodes.find(n=>Number(n.dataset.offset)<=offset&&Number(n.dataset.end)>offset)??lineNodes.find(n=>Number(n.dataset.offset)===offset)??[...lineNodes].reverse().find(n=>Number(n.dataset.end)===offset)??pageNodes.find(n=>Number(n.dataset.offset)<=offset&&Number(n.dataset.end)>offset)??pageNodes.find(n=>Number(n.dataset.offset)===offset)??[...pageNodes].reverse().find(n=>Number(n.dataset.end)===offset)??nodes.at(-1);
+      const candidates=[lineNodes,pageNodes,nodes].map(list=>list.filter(n=>Number(n.dataset.offset)<=offset&&Number(n.dataset.end)>=offset)).find(list=>list.length)??[];
+      const candidateIndex=pickCaretCandidate(candidates.map(n=>({start:Number(n.dataset.offset),end:Number(n.dataset.end),empty:n.dataset.empty!==undefined})),offset,rangeSelection.start===rangeSelection.end&&preferTextEnd.current===offset);
+      const node=candidates[candidateIndex]??nodes.at(-1);
       return node?.firstChild?{node:node.firstChild,offset:node.dataset.empty!==undefined?0:Math.max(0,Math.min(offset-Number(node.dataset.offset),node.textContent?.length??0))}:null;
     };
     const a=point(rangeSelection.start,backward||rangeSelection.start===rangeSelection.end),b=point(rangeSelection.end,!backward);
@@ -48,10 +51,11 @@ export function EditorCanvas(props:Props) {
     ((backward?a:b).node.parentElement?.closest('.page-edit') as HTMLElement)?.focus({preventScroll:true});
     const range=document.createRange(); range.setStart(a.node,a.offset);range.setEnd(b.node,b.offset);
     const selected=window.getSelection(); selected?.removeAllRanges();selected?.addRange(range);if(backward)selected?.setBaseAndExtent(b.node,b.offset,a.node,a.offset);
+    if(rangeSelection.start===rangeSelection.end&&preferTextEnd.current===rangeSelection.end)preferTextEnd.current=null;
   };
   useLayoutEffect(()=>restore(),[props.caretRequest]);
   const capture=()=>{if(!composing.current){const range=readSelection();if(range)props.onSelection(range);}};
-  const insert=(text:string,range=readSelection()??props.selection)=>props.onInsert(range.start,range.end,text);
+  const insert=(text:string,range=readSelection()??props.selection)=>{if(text)preferTextEnd.current=range.start+text.length;props.onInsert(range.start,range.end,text);};
   const handleInput=(event:FormEvent<HTMLDivElement>)=>{
     const e=event.nativeEvent as InputEvent;
     if(composing.current||e.isComposing||e.inputType==='insertCompositionText')return;

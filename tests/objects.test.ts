@@ -2,6 +2,7 @@ import {expect,test} from 'vitest';
 import {newProject,replaceRange,type FloatingObject} from '../src/core/model';
 import {compose} from '../src/core/compose';
 import {changeWritingMode,moveFixedObjectToPage} from '../src/core/objects';
+import {autoScrollDelta,dropObjectOnPage,nearestPageIndex} from '../src/core/object-drag';
 import {packProject,unpackProject} from '../src/core/archive';
 
 test('本文を全削除してもページ固定文字箱の位置と保存可能性を保つ',()=>{
@@ -24,4 +25,17 @@ test('ページ固定の画像は座標を保ったまま指定ページへ移�
   const p=newProject();
   p.objects=[{id:'picture',kind:'image',assetId:'test',anchorMode:'page',anchorOffset:0,pageIndex:0,x:32,y:48,width:60,height:40,rotation:0,opacity:1,wrap:false,paddingMm:0,hideRuling:false,z:10}];
   expect(moveFixedObjectToPage(p,'picture',2).objects[0]).toMatchObject({pageIndex:2,x:32,y:48});
+});
+test('ドラッグ位置に最も近いページと、そのページ内の画像座標を求める',()=>{
+  const pages=[
+    {left:100,top:100,right:500,bottom:700,width:400,height:600},
+    {left:100,top:760,right:500,bottom:1360,width:400,height:600},
+  ];
+  expect(nearestPageIndex(260,800,pages)).toBe(1);
+  expect(dropObjectOnPage(260,800,{x:20,y:10},pages[1],200,300,40,30)).toEqual({x:60,y:10});
+});
+test('画像ドラッグが表示領域の上下端へ近づくほど自動スクロールする',()=>{
+  expect(autoScrollDelta(105,100,700)).toBeLessThan(0);
+  expect(autoScrollDelta(400,100,700)).toBe(0);
+  expect(autoScrollDelta(695,100,700)).toBeGreaterThan(0);
 });

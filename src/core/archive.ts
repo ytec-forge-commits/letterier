@@ -1,6 +1,7 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import { defaultStyle, type Project, type TextStyle, type PageVisual, type FloatingObject, type Asset } from './model';
 import {inspectImagePixels} from './image-budget';
+import {ensureStationeryMargins} from './stationery-layout';
 export const MAX_DOCUMENT_BYTES=64*1024*1024;
 const error=()=>new Error('この便箋ファイルは破損しているか、対応していない内容を含んでいます。元のファイルは変更していません。');
 const obj=(v:unknown):Record<string,unknown>=>{if(!v||typeof v!=='object'||Array.isArray(v))throw error();return v as Record<string,unknown>;};
@@ -62,7 +63,7 @@ export function validateProject(value: unknown): Project {
   const refs=[...pages,continuation].map(p=>p.background.assetId).concat(objects.filter(o=>o.kind==='image').map(o=>o.assetId));
   if(refs.some(id=>id&&!Object.hasOwn(assets,id)))throw error();
   if(new Set(objects.map(o=>o.id)).size!==objects.length)throw error();
-  return {format:'binsen',version:2,id:key(p.id),title:string(p.title,200),settings:{paper:choice(settings.paper,['A4','B5','POSTCARD']),orientation:choice(settings.orientation,['portrait','landscape']),writingMode:choice(settings.writingMode,['horizontal','vertical']),orphanControl:bool(settings.orphanControl)},baseStyle:style(p.baseStyle) as TextStyle,body:{runs},pages,continuation,objects,assets,templateId:key(p.templateId)};
+  return ensureStationeryMargins({format:'binsen',version:2,id:key(p.id),title:string(p.title,200),settings:{paper:choice(settings.paper,['A4','B5','POSTCARD']),orientation:choice(settings.orientation,['portrait','landscape']),writingMode:choice(settings.writingMode,['horizontal','vertical']),orphanControl:bool(settings.orphanControl)},baseStyle:style(p.baseStyle) as TextStyle,body:{runs},pages,continuation,objects,assets,templateId:key(p.templateId)});
 }
 
 export function base64Bytes(value:string):Uint8Array {

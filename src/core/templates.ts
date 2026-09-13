@@ -1,5 +1,6 @@
 import {cloneProject,newProject,clone,uid,type Project,type WritingMode} from './model';
 import {compose,type Measure} from './compose';
+import {decorationMotifPlacement,illustratedTemplateIds} from './stationery-layout';
 export interface Template {id:string;name:string;family:'和風'|'洋風';season:'通年'|'春'|'夏'|'秋'|'冬';description:string;color:string;accent:string;paper:string}
 const catalog=[
   ['washi','白の和紙','白に近い和紙の質感と、静かな細い罫線。','#a6b5aa','#405c4c','#fffefa'],
@@ -24,13 +25,16 @@ const catalog=[
   ['christmas','クリスマスリース','緑のリースと赤い実。小さなリボンを添えて。','#a9bbaa','#42634b','#fffefb'],
 ] as const;
 export const templates:Template[]=catalog.map(([id,name,description,color,accent,paper],i)=>({id,name,description,color,accent,paper,family:i<10?'和風':'洋風',season:(['通年','春','夏','秋','冬'] as const)[Math.floor(i%10/2)]}));
-export interface AppTheme {id:string;name:string;accent:string;soft:string;previewDesign?:string}
-export const appThemes:AppTheme[]=[{id:'plain',name:'無地',accent:'#315a45',soft:'#eef2e9'},...templates.map(t=>({id:t.id,name:t.name,accent:t.accent,soft:t.color,previewDesign:`${t.id}-first`}))];
+export interface AppTheme {id:string;name:string;accent:string;soft:string}
+export const appThemes:AppTheme[]=[{id:'plain',name:'無地',accent:'#315a45',soft:'#eef2e9'},...templates.map(t=>({id:t.id,name:t.name,accent:t.accent,soft:t.color}))];
 export function createFromTemplate(id:string,mode:WritingMode='horizontal'):Project{
   const t=templates.find(t=>t.id===id);if(!t)throw new Error('この便箋テンプレートが見つかりません。');
   const p=newProject();p.templateId=id;p.settings.writingMode=mode;
   p.pages[0].design=`${id}-first`;p.pages[0].background.color=t.paper;p.pages[0].ruling.color=t.color;
-  p.continuation={...clone(p.pages[0]),id:uid(),design:`${id}-continuation`};return p;
+  if(illustratedTemplateIds.has(id))p.pages[0].ruling.margins=decorationMotifPlacement(210,297,mode,false).reserved;
+  p.continuation={...clone(p.pages[0]),id:uid(),design:`${id}-continuation`};
+  if(illustratedTemplateIds.has(id))p.continuation.ruling.margins=decorationMotifPlacement(210,297,mode,true).reserved;
+  return p;
 }
 export function applyTemplateDesign(p:Project,id:string):Project{
   const template=createFromTemplate(id,p.settings.writingMode),next=cloneProject(p);

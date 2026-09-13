@@ -2,7 +2,7 @@ async(page)=>{
  await page.getByRole('button',{name:'便箋を選ぶ',exact:true}).click();
  await page.getByRole('button',{name:'白の和紙 和風 · 通年',exact:true}).click();
  await page.getByRole('button',{name:'この便箋で新しい手紙',exact:true}).click();
- const title='再開順序の合成試験 '+Date.now();await page.getByLabel('手紙の名前').fill(title);
+ const title='再開順序の合成試験 '+Date.now();await page.getByRole('button',{name:'ファイル',exact:true}).click();await page.getByLabel('手紙の名前').fill(title);await page.getByRole('button',{name:'閉じる',exact:true}).click();
  await page.getByRole('textbox',{name:'手紙の本文 1ページ',exact:true}).click();
  await page.keyboard.insertText('保存済み');await page.keyboard.press('Control+s');
  await page.getByRole('status').filter({hasText:'自動保存済み'}).waitFor();

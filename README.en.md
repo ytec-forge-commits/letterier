@@ -6,9 +6,9 @@ Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface is 
 
 ## Use
 
-Choose stationery with **便箋を選ぶ**, click the paper and type. Twenty designs include first and continuation pages in both writing directions. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Select text to format it; add an image with **写真・画像** or a text box with **文字箱**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring.
+Choose stationery with **便箋を選ぶ**, click the paper and type. Twenty designs include first and continuation pages in both writing directions. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Choose **標準フォント** before writing, format a selection, or apply the standard font to the current page or the whole body. Add an image with **写真・画像** or a text box with **文字箱**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring. Holding an image near the top or bottom edge while dragging auto-scrolls the document and lets the image move to another page.
 
-Use **ファイル → 名前を付けて保存** to save a `.binsen` document. Recovery data is saved locally while editing. **PDF・印刷** previews and exports PDF or prints through Windows, with actual size, fit and cancel choices for printable-area warnings. The 21 interface themes and larger control text do not change printed stationery.
+Use **ファイル → 名前を付けて保存** to save a `.binsen` document. Recovery data is saved locally while editing. **PDF・印刷** previews and exports PDF or prints through Windows, with actual size, fit and cancel choices for printable-area warnings. The 21 color-only interface themes and larger control text do not change stationery artwork or printed output.
 
 Printing defaults to fitting the entire sheet inside the printer's printable area. The Print preview reflects the selected scale and unprintable margins; its dotted guide is never printed. Actual-size printing can clip decorations near physical paper edges. The PDF preview and exported PDF always use actual page dimensions, independently of printer scaling.
 
@@ -34,6 +34,6 @@ npm run build:native
 
 Run development with `npm run tauri -- dev`. Outputs are `.local/frontend` and `.local/cargo-target`. Browser regression scripts are under `tests/browser`; browser IndexedDB is test storage separate from Windows app data. Generate notices with `python scripts/collect-licenses.py` after fetching dependencies. Pinned fonts and PDF resources are already local; acquisition scripts are under `scripts/`.
 
-See [distribution](distribution/README.md) for Store and direct-download preparation. Builds are currently for owner review; nothing has been uploaded to GitHub, Forge or Microsoft Store.
+See [distribution](distribution/README.md) for Store and direct-download preparation. Source is public on [GitHub](https://github.com/ytec-forge-commits/letterier); Forge and Microsoft Store distribution remain pending final review.
 
 Original code is [Apache-2.0](LICENSE). [Third-party notices](THIRD_PARTY_NOTICES.md), [asset terms](ASSETS_LICENSE.md), [brand policy](BRAND_POLICY.md), [scope exceptions](LICENSE_EXCEPTIONS.md) and [privacy](PRIVACY.md) apply separately. Full notices and unmodified MPL corresponding source are included in `public/legal/` and the distribution's legal directory.
