@@ -7,8 +7,11 @@ export const generatedArt:Record<string,string>={
   'snow-garden':'snow-garden',camellia:'camellia',moon:'moon',mimosa:'mimosa',tulip:'tulip',
   seaside:'seaside',lemon:'lemon','autumn-leaf':'autumn-leaf',woodland:'woodland',snowflake:'snowflake',christmas:'christmas'
 };
+export const generatedCompanionArt:Record<string,string>=Object.fromEntries(
+  Object.keys(generatedArt).map(id=>[id,`${id}-companion`]),
+);
 export function templateArtPath(_id:string,art:string|undefined){
-  return art?`/template-motifs/${art}.png?v=20260914`:'';
+  return art?`/template-motifs/${art}.png?v=1.0.2`:'';
 }
 // Original vector artwork. All coordinates are in millimetres; no external assets or fonts.
 function Leaf({x,y,angle=0,color='#7c9a77',size=1}:{x:number;y:number;angle?:number;color?:string;size?:number}){
@@ -54,9 +57,10 @@ export function PaperDecoration({design,width,height,writingMode}:{design:string
   const vertical=writingMode==='vertical';
   const art=generatedArt[id];
   const artPath=templateArtPath(id,art);
+  const companionArtPath=templateArtPath(id,generatedCompanionArt[id]);
   const layout=decorationMotifLayout(id,width,height,writingMode,continuation);
   return <svg className="paper-decoration" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-    {artPath&&layout.placements.map((placement,index)=><image key={index} href={artPath} x={placement.x} y={placement.y} width={placement.width} height={placement.height} opacity={placement.opacity} preserveAspectRatio="xMidYMid meet" transform={placement.rotation?`rotate(${placement.rotation} ${placement.x+placement.width/2} ${placement.y+placement.height/2})`:undefined}/>)}
+    {artPath&&layout.placements.map((placement,index)=><image key={`${placement.art}-${index}`} href={placement.art==='primary'?artPath:companionArtPath} x={placement.x} y={placement.y} width={placement.width} height={placement.height} opacity={placement.opacity} preserveAspectRatio="xMidYMid meet" transform={placement.rotation?`rotate(${placement.rotation} ${placement.x+placement.width/2} ${placement.y+placement.height/2})`:undefined}/>)}
     {id==='washi'&&<g stroke="#c4c0ab" strokeWidth=".12" opacity=".22">{Array.from({length:50},(_,i)=>{const x=(i*43.27)%width,y=(i*61.7)%height;return <path key={i} d={`M${x} ${y}l${2+i%3} ${.7-i%2}`}/>;})}</g>}
     {id==='ichimatsu'&&!art&&<g fill="#597e9c" opacity={continuation?.14:.22}>{Array.from({length:Math.floor(width/5)-2},(_,i)=><g key={i}><rect x={5+i*5} y={i%2?5:10} width="5" height="5"/><rect x={5+i*5} y={height-(i%2?10:15)} width="5" height="5"/></g>)}</g>}
     {id==='classic'&&<g fill="none" stroke="#b3a98e" strokeWidth=".3" opacity={continuation?.48:.75}><rect x="8" y="8" width={width-16} height={height-16}/>{[[8,8,0],[width-8,8,90],[width-8,height-8,180],[8,height-8,270]].map(([x,y,a],i)=><path key={i} transform={`translate(${x} ${y}) rotate(${a})`} d="M2 14V2H14M4 8Q8 8 8 4M4 4Q4 11 11 11Q11 4 4 4"/>)}</g>}

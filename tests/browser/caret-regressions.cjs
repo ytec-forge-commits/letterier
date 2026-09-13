@@ -6,7 +6,7 @@ async(page)=>{
  await focusEnd();await page.keyboard.press('ArrowDown');if(await page.evaluate(()=>getSelection().focusNode.parentElement.closest('.page-edit').getAttribute('aria-label'))!=='手紙の本文 2ページ')throw Error('Down boundary blocked');
  await page.keyboard.press('Control+a');await page.keyboard.insertText('ABCDE');
  await page.evaluate(()=>{let t=document.querySelector('[data-offset="2"]');getSelection().setBaseAndExtent(t.firstChild,0,t.firstChild,0);const d=new DataTransfer();d.setData('text/plain','X\r\nY');document.querySelector('.page-edit').dispatchEvent(new ClipboardEvent('paste',{clipboardData:d,bubbles:true,cancelable:true}));});
- await page.keyboard.insertText('!');if(await page.locator('.page-edit').textContent()!=='ABX\nY!CDE')throw Error('CRLF caret mismatch '+await page.locator('.page-edit').textContent());
+ await page.keyboard.insertText('!');const pasted=(await page.locator('.page-edit').textContent()).replaceAll('\u200b','');if(pasted!=='ABX\nY!CDE')throw Error('CRLF caret mismatch '+pasted);
  await page.getByLabel('書字方向',{exact:true}).selectOption('vertical');
  const first=page.locator('.page-edit').first();await first.click();await page.keyboard.press('Control+a');await page.keyboard.insertText('甲乙');await page.keyboard.press('Enter');
  const newlineCaret=await page.evaluate(()=>{const s=getSelection(),n=s.anchorNode,p=n?.nodeType===3?n.parentElement:n;return {offset:s.anchorOffset,empty:p instanceof HTMLElement&&p.hasAttribute('data-empty'),lineStart:p instanceof HTMLElement?p.dataset.offset:null};});

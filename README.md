@@ -2,11 +2,13 @@
 
 便箋の上へ直接文章を書き、写真や署名を添えて、PDF・印刷まで仕上げるWindows用の手紙作成アプリです。[English](README.en.md)
 
-対象はWindows 10/11 x64、WebView2 Runtimeが必要です。日本語の縦書き・横書きの手紙作成に用途を絞るため、利用者の指定によりUIは日本語のみです。手紙や画像はPC内で処理します。
+対象はWindows 10/11 x64、WebView2 Runtimeが必要です。UIは日本語・英語を切り替えられ、日本語の縦書き／横書きと英語の横書きに対応します。手紙や画像はPC内で処理し、通常利用にインターネット接続は不要です。
+
+現在のバージョンは **1.0.2** です。詳しい手順は[日本語操作マニュアル](docs/manual/ja/README.md)をご覧ください。
 
 ## はじめ方
 
-1. 「便箋を選ぶ」から和風10種・洋風10種を選びます。各デザインに縦横・1枚目・続き用の見た目があります。
+1. 「便箋を選ぶ」から和風10種・洋風10種を選びます。装飾は本文外周に収まり、どの便箋でも本文領域の広さは変わりません。
 2. 用紙をクリックして本文を入力します。用紙はA4、B5、はがき。本文が増えると次のページへ続きます。
 3. 書き始める前に右側の「標準フォント」を選べます。文字を選んだ部分だけの変更に加え、現在のページまたは全ページの本文を標準フォントへ一括で揃えられます。
 4. 写真・画像や文字箱は移動・拡縮・回転・透明度・前後関係・本文回り込みを調整できます。写真を用紙の上下端へドラッグし続けると画面が自動でスクロールし、別ページへそのまま移動できます。
@@ -29,7 +31,7 @@ Ctrl+S 保存 / Ctrl+Shift+S 名前を付けて保存 / Ctrl+Z 元に戻す / Ct
 
 手書き風20書体を同梱します。Windowsのインストール済みフォントも利用でき、不足フォントは代替表示しながら元の指定を保持します。JPEG・PNG等のほか、静的SVG、GIF/WebPのコマ選択、PSD統合画像、PDF互換AI/PDFのページ選択、OSコーデック対応時のHEICを扱います。詳細・上限・品質の違いは[画像形式](IMAGE-FORMATS.md)を参照してください。
 
-本文・罫線・便箋装飾・静的SVGはベクターPDF出力です。PDF互換素材は画像へ変換します。Word形式、PSDレイヤー編集、クラウド同期、スマートフォン版は対象外です。
+本文・罫線・静的SVGはベクターPDFとして出力します。生成した便箋モチーフと写真などのラスター素材だけを画像として埋め込み、便箋全体を1枚の画像にはしません。PDF互換素材は画像へ変換します。Word形式、PSDレイヤー編集、クラウド同期、スマートフォン版は対象外です。
 
 ## 開発・検証・配布
 
@@ -45,7 +47,7 @@ npm run build:native
 
 フロントエンド生成先は `.local/frontend`、ネイティブ生成先は `.local/cargo-target` です。開発起動は `npm run tauri -- dev`。ブラウザー試験は `tests/browser/` のPlaywright CLIスクリプトを使用します。ブラウザーの保存先は検証用IndexedDBで、Windows版と共有しません。
 
-ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開し、Forge・Store向け配布は完成確認後に行います。
+ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開しています。確認用ビルドと正式配布物を区別し、Forge・Microsoft Store向け配布は完成確認、署名、配布検査後に行います。
 
 ## ライセンス
 

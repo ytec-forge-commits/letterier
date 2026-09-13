@@ -7,7 +7,7 @@ import { ObjectLayer } from './ObjectLayer';
 import {moveBlockCaret,pickCaretCandidate} from '../core/caret';
 
 export interface TextSelection { start:number; end:number }
-interface Props { currentStyle:TextStyle;project:Project;layout:Layout;zoom:number;selection:TextSelection;caretRequest:number;onSelection:(value:TextSelection)=>void;onInsert:(start:number,end:number,text:string)=>void;onHistory:(redo:boolean)=>void;onFormat:(style:Partial<TextStyle>)=>void;onPage:(page:number)=>void;selectedObject?:string|null;onSelectObject?:(id:string)=>void;onObjectPreview?:(id:string,patch:Partial<FloatingObject>|null)=>void;onObjectChange?:(id:string,patch:Partial<FloatingObject>)=>void;onObjectDelete?:(id:string)=>void }
+interface Props { uiLanguage:'ja'|'en';currentStyle:TextStyle;project:Project;layout:Layout;zoom:number;selection:TextSelection;caretRequest:number;onSelection:(value:TextSelection)=>void;onInsert:(start:number,end:number,text:string)=>void;onHistory:(redo:boolean)=>void;onFormat:(style:Partial<TextStyle>)=>void;onPage:(page:number)=>void;selectedObject?:string|null;onSelectObject?:(id:string)=>void;onObjectPreview?:(id:string,patch:Partial<FloatingObject>|null)=>void;onObjectChange?:(id:string,patch:Partial<FloatingObject>)=>void;onObjectDelete?:(id:string)=>void }
 
 function domOffset(node:Node|null, offset:number):number|null {
   if(!node) return null;
@@ -39,7 +39,7 @@ export function EditorCanvas(props:Props) {
     if(!root.current||composing.current) return;
     const nodes=Array.from(root.current.querySelectorAll<HTMLElement>('[data-offset]'));
     const point=(offset:number,isFocus:boolean)=>{
-      const pageNodes=focusPage===undefined||!isFocus?nodes:nodes.filter(n=>n.closest('.page-edit')?.getAttribute('aria-label')===`手紙の本文 ${focusPage+1}ページ`);
+      const pageNodes=focusPage===undefined||!isFocus?nodes:nodes.filter(n=>(n.closest('.page-edit') as HTMLElement|null)?.dataset.pageIndex===String(focusPage));
       const lineNodes=focusLine===undefined||!isFocus?pageNodes:pageNodes.filter(n=>(n.closest('.body-line') as HTMLElement|null)?.dataset.lineIndex===String(focusLine));
       const candidates=[lineNodes,pageNodes,nodes].map(list=>list.filter(n=>Number(n.dataset.offset)<=offset&&Number(n.dataset.end)>=offset)).find(list=>list.length)??[];
       const candidateIndex=pickCaretCandidate(candidates.map(n=>({start:Number(n.dataset.offset),end:Number(n.dataset.end),empty:n.dataset.empty!==undefined,separator:n.dataset.separator!==undefined})),offset,rangeSelection.start===rangeSelection.end&&preferTextEnd.current===offset);
@@ -127,7 +127,7 @@ export function EditorCanvas(props:Props) {
     {props.layout.pages.map((page,index)=><section key={index} className="sheet-frame" style={{width:`${props.layout.width*96/25.4*props.zoom}px`,height:`${props.layout.height*96/25.4*props.zoom}px`}} aria-label={`${index+1}ページ`}>
       <div className="paper" style={{width:`${props.layout.width}mm`,height:`${props.layout.height}mm`,transform:`scale(${props.zoom})`}}>
         <PageArtwork project={props.project} layout={props.layout} index={index}/>
-        <div className="page-edit" key={`${index}-${props.caretRequest}`} role="textbox" aria-label={`手紙の本文 ${index+1}ページ`} aria-multiline="true" contentEditable suppressContentEditableWarning spellCheck={false} lang="ja" data-writing-mode={props.project.settings.writingMode} onClick={e=>clickPaper(e,index)}>
+        <div className="page-edit" key={`${index}-${props.caretRequest}`} role="textbox" aria-label={`手紙の本文 ${index+1}ページ`} aria-multiline="true" contentEditable suppressContentEditableWarning spellCheck={false} lang={props.uiLanguage} data-page-index={index} data-writing-mode={props.project.settings.writingMode} onClick={e=>clickPaper(e,index)}>
           {[...page.lines,...page.caretLines].map((line,i)=><LineContent key={i} index={i} line={line} vertical={props.project.settings.writingMode==='vertical'}/>)}
         </div>
         {props.onSelectObject&&props.onObjectPreview&&props.onObjectChange&&props.onObjectDelete&&<ObjectLayer project={props.project} layout={props.layout} page={index} zoom={props.zoom} selected={props.selectedObject??null} onSelect={props.onSelectObject} onPreview={props.onObjectPreview} onChange={props.onObjectChange} onDelete={props.onObjectDelete}/>}

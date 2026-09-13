@@ -3,7 +3,7 @@ import {bodyText,newProject,paperSize,replaceRange} from '../src/core/model';
 import {packProject,unpackProject} from '../src/core/archive';
 import {compose} from '../src/core/compose';
 import {templates,createFromTemplate,applyTemplateDesign,makeUserTemplate,appThemes} from '../src/core/templates';
-import {decorationMotifLayout,generatedArt,templateArtPath} from '../src/ui/PaperDecoration';
+import {decorationMotifLayout,generatedArt,generatedCompanionArt,templateArtPath} from '../src/ui/PaperDecoration';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
@@ -13,6 +13,8 @@ function pngColorType(path:string){
 test('白の和紙は画像なし、生成素材はテンプレート間で共有しない',()=>{
   expect(generatedArt.washi).toBeUndefined();
   expect(new Set(Object.values(generatedArt)).size).toBe(Object.values(generatedArt).length);
+  expect(new Set(Object.values(generatedCompanionArt)).size).toBe(Object.values(generatedCompanionArt).length);
+  expect(new Set([...Object.values(generatedArt),...Object.values(generatedCompanionArt)]).size).toBe(Object.values(generatedArt).length+Object.values(generatedCompanionArt).length);
 });
 test('藍の市松素材はチェッカー柄を背景に焼き込まずRGBA透過である',()=>{
   expect(pngColorType(fileURLToPath(new URL('../public/template-art/ichimatsu.png',import.meta.url)))).toBe(6);
@@ -20,8 +22,10 @@ test('藍の市松素材はチェッカー柄を背景に焼き込まずRGBA透�
 test('描き直した便箋素材は更新後のURLを使い古いキャッシュを表示しない',()=>{
   for(const id of ['ichimatsu','sakura','nanohana','asagao','goldfish','momiji','snow-garden','camellia','moon','mimosa','tulip','seaside','lemon','autumn-leaf','woodland','snowflake','christmas']){
     expect(generatedArt[id]).toBe(id);
+    expect(generatedCompanionArt[id]).toBe(`${id}-companion`);
     expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}.png`,import.meta.url)))).toBe(6);
-    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=20260914`);
+    expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}-companion.png`,import.meta.url)))).toBe(6);
+    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=1.0.2`);
   }
 });
 test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備える',()=>{
@@ -31,36 +35,40 @@ test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備
 test('画面テーマは便箋画像を持たず配色だけで選べる',()=>{
   expect(appThemes.every(theme=>!('previewDesign' in theme))).toBe(true);
 });
-test('便箋ごとに角・対角・左右・フッターを使い分け、本文安全域へ重ねない',()=>{
+test('便箋ごとに四隅・左右・上辺・フッターを使い分け、固定本文領域へ重ねない',()=>{
   const signatures=new Set<string>();
   for(const id of Object.keys(generatedArt))for(const [width,height] of [[210,297],[297,210]] as const){
     const layout=decorationMotifLayout(id,width,height,'vertical',false);
     signatures.add(layout.pattern);
-    expect(Math.max(...layout.placements.map(p=>Math.max(p.width,p.height))),`${id} ${width}x${height} の主モチーフ`).toBeGreaterThanOrEqual(40);
-    const body={left:layout.reserved.left,top:layout.reserved.top,right:width-layout.reserved.right,bottom:height-layout.reserved.bottom};
+    expect(layout.reserved).toEqual({top:20,right:20,bottom:20,left:20});
+    expect(layout.placements,`${id} ${width}x${height} で主役と脇役を一度ずつ使う`).toHaveLength(2);
+    expect(new Set(layout.placements.map(p=>p.art))).toEqual(new Set(['primary','companion']));
+    expect(Math.max(...layout.placements.map(p=>Math.max(p.width,p.height))),`${id} ${width}x${height} の主モチーフ`).toBeGreaterThanOrEqual(15);
+    const body={left:20,top:20,right:width-20,bottom:height-20};
     for(const motif of layout.placements){
       const overlaps=motif.x<body.right&&motif.x+motif.width>body.left&&motif.y<body.bottom&&motif.y+motif.height>body.top;
       expect(overlaps,`${id} ${width}x${height}`).toBe(false);
     }
   }
-  expect(signatures.size).toBeGreaterThanOrEqual(5);
-  expect(decorationMotifLayout('sakura',210,297,'vertical',false).placements.length).toBe(2);
-  const footer=decorationMotifLayout('seaside',297,210,'horizontal',false).placements;
-  expect(Math.max(...footer.map(p=>p.x+p.width))-Math.min(...footer.map(p=>p.x))).toBeGreaterThan(297*.7);
+  expect(signatures.size).toBeGreaterThanOrEqual(6);
+  const footerIds=['goldfish','snow-garden','tulip','seaside'];
+  expect(new Set(footerIds.map(id=>decorationMotifLayout(id,297,210,'horizontal',false).placements[0].x)).size).toBeGreaterThanOrEqual(3);
 });
-test('イラスト付き便箋は書字方向に応じてワンポイント用の本文余白を確保する',()=>{
-  const horizontal=createFromTemplate('lemon','horizontal');
-  const vertical=createFromTemplate('lemon','vertical');
-  expect(horizontal.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',false).reserved);
-  expect(horizontal.continuation.ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',true).reserved);
-  expect(vertical.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'vertical',false).reserved);
-  expect(createFromTemplate('washi').pages[0].ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
+test('どの便箋・書字方向でも本文領域の広さを変えない',()=>{
+  const standard={top:20,right:20,bottom:20,left:20};
+  for(const template of templates)for(const mode of ['horizontal','vertical'] as const){
+    const project=createFromTemplate(template.id,mode);
+    expect(project.pages[0].ruling.margins,`${template.id} ${mode} 1ページ目`).toEqual(standard);
+    expect(project.continuation.ruling.margins,`${template.id} ${mode} 続き`).toEqual(standard);
+  }
 });
-test('旧版の標準余白で保存されたイラスト便箋だけを安全余白へ補正する',()=>{
+test('旧版が自動拡張した余白だけを固定本文領域へ戻し、手動余白は守る',()=>{
   const old=newProject();old.templateId='lemon';old.settings.writingMode='horizontal';old.pages[0].design='lemon-first';old.continuation.design='lemon-continuation';
+  old.pages[0].ruling.margins={top:54.1,right:20,bottom:20,left:54.1};
+  old.continuation.ruling.margins={top:39.99,right:20,bottom:20,left:39.99};
   const restored=unpackProject(packProject(old));
-  expect(restored.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',false).reserved);
-  expect(restored.continuation.ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',true).reserved);
+  expect(restored.pages[0].ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
+  expect(restored.continuation.ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
   old.pages[0].ruling.margins={top:18,right:22,bottom:25,left:19};
   expect(unpackProject(packProject(old)).pages[0].ruling.margins).toEqual({top:18,right:22,bottom:25,left:19});
 });
@@ -68,9 +76,9 @@ test('既存文書へ便箋を適用すると用紙サイズと縦横に合う�
   const source=newProject();source.settings.paper='POSTCARD';source.settings.orientation='landscape';source.pages.push({...structuredClone(source.continuation),id:'page-2'});
   const applied=applyTemplateDesign(source,'seaside'),{width,height}=paperSize(applied);
   expect([width,height]).toEqual([148,100]);
-  expect(applied.pages[0].ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',false).reserved);
-  expect(applied.pages[1].ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',true).reserved);
-  expect(applied.continuation.ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',true).reserved);
+  expect(applied.pages[0].ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
+  expect(applied.pages[1].ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
+  expect(applied.continuation.ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
 });
 test('全20種で縦横・最初と続きのデザインを文書として保存できる',()=>{
   expect(templates.length).toBe(20);

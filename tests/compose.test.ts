@@ -27,6 +27,11 @@ test('横書き3文字×2行で続きページへ流し本文位置を保持す�
   expect(layout.pages.map(p=>p.lines.map(l=>l.tokens.map(t=>t.text).join('')))).toEqual([['あいう','えおか'],['きくけ']]);
   expect(layout.pages.map(p=>[p.start,p.end])).toEqual([[0,6],[6,9]]);
 });
+test('横書きの英文は空白を優先して単語の途中で折り返さない',()=>{
+  const project=tiny('one two six');project.pages[0].ruling.margins.right=170;project.continuation=structuredClone(project.pages[0]);
+  const layout=compose(project,measure);
+  expect(layout.pages.flatMap(page=>page.lines).map(line=>line.tokens.map(token=>token.text).join('').trim())).toEqual(['one','two','six']);
+});
 test('縦書きは右列から左列へ流す',()=>{
   const layout=compose(tiny('あいうえおかきくけ',true),()=>5);
   expect(layout.pages[0].lines.map(l=>l.x)).toEqual([180,170]);

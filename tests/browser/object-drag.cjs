@@ -1,6 +1,6 @@
 async(page)=>{
  await page.getByRole('button',{name:'便箋を選ぶ',exact:true}).click();await page.getByRole('button',{name:'白の和紙 和風 · 通年',exact:true}).click();await page.getByRole('button',{name:'この便箋で新しい手紙',exact:true}).click();
- await page.locator('.toolbar input[type=file]').setInputFiles('output/fixtures/日本語素材.png');
+ await page.locator('.app-header input[type=file]').setInputFiles('output/fixtures/日本語素材.png');
  const hit=page.getByRole('button',{name:'画像を選択 日本語素材.png',exact:true});await hit.waitFor();await page.getByRole('button',{name:'末尾にページを追加',exact:true}).click();
  const rect=await hit.boundingBox();if(!rect)throw Error('image drag handle not visible');
  await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();

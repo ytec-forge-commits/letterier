@@ -2,13 +2,14 @@
   "name": "binsen-kobo",
   "description": "レタリエ — 手紙・便箋作成アプリ",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit && npm run check:version",
+    "check:version": "node scripts/check-version.mjs",
     "tauri": "node scripts/native.mjs tauri",
     "test:native": "node scripts/native.mjs cargo test",
     "build:native": "node scripts/native.mjs tauri build"

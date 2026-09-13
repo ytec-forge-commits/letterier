@@ -17,9 +17,9 @@ async(page)=>{
  await page.locator('#font').click();const recents=dialog.locator('.font-group').filter({has:page.getByRole('heading',{name:'最近使ったフォント',exact:true})});
  if((await recents.getByRole('button').allTextContents()).slice(0,2).join(',')!=='Yomogi,Klee One')throw Error('recent order');
  await dialog.getByRole('button',{name:'Caveat',exact:true}).last().click();await dialog.getByRole('button',{name:'キャンセル'}).click();
- await page.getByRole('button',{name:'画面設定・使い方',exact:true}).click();await page.getByRole('button',{name:'オープンソースライセンス → 同梱フォント'}).click();
+ await page.getByRole('button',{name:'設定・使い方',exact:true}).click();await page.getByRole('button',{name:'オープンソースライセンス → 同梱フォント'}).click();
  const license=page.getByRole('dialog',{name:'同梱フォントのライセンス'});if(!(await license.locator('pre').textContent()).includes('SIL OPEN FONT LICENSE'))throw Error('license missing');
- await license.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('dialog',{name:'画面設定・使い方'}).getByRole('button',{name:'閉じる',exact:true}).click();
+ await license.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('dialog',{name:'設定・使い方'}).getByRole('button',{name:'閉じる',exact:true}).click();
  await page.getByRole('status').filter({hasText:'自動保存済み'}).waitFor();await page.reload();await page.locator('#font').waitFor();await page.locator('#font').click();
  const again=page.getByRole('dialog',{name:'フォントを選択'}).locator('.font-group').filter({has:page.getByRole('heading',{name:'最近使ったフォント',exact:true})});if((await again.getByRole('button').allTextContents()).slice(0,2).join(',')!=='Yomogi,Klee One')throw Error('recent persist/cancel');
  await page.getByRole('dialog',{name:'フォントを選択'}).getByRole('button',{name:'キャンセル'}).click();

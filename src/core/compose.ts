@@ -90,7 +90,7 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
           trailing=false; break;
         }
         if(tokens[cursor].advance>b-a && b-a<extent-0.01) continue;
-        let end=lineEnd(tokens,cursor,b-a);
+        let end=lineEnd(tokens,cursor,b-a,!vertical);
         const line: LayoutLine={pageIndex,x:vertical?x:a,y:vertical?a:y,extent:b-a,spacing,start:tokens[cursor].start,end:tokens[end-1]?.end??tokens[cursor].start,tokens:tokens.slice(cursor,end)};
         if(tokens[end]?.text==='\n' || tokens[end]?.text==='\f') {
           const separator=tokens[end++];
