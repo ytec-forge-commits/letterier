@@ -1,11 +1,15 @@
 import type {WritingMode} from '../core/model';
 import {templates} from '../core/templates';
 export const generatedArt:Record<string,string>={
-  ichimatsu:'ichimatsu',sakura:'sakura',nanohana:'nanohana',asagao:'asagao',
-  goldfish:'goldfish',momiji:'momiji','snow-garden':'snow-garden',christmas:'christmas'
+  ichimatsu:'ichimatsu',sakura:'sakura',nanohana:'nanohana',asagao:'asagao',goldfish:'goldfish',momiji:'momiji',
+  'snow-garden':'snow-garden',camellia:'camellia',moon:'moon',mimosa:'mimosa',tulip:'tulip',
+  seaside:'seaside',lemon:'lemon','autumn-leaf':'autumn-leaf',woodland:'woodland',snowflake:'snowflake',christmas:'christmas'
 };
+// These illustrations are composed as full stationery borders. Rendering them at
+// their intended scale preserves their brushwork instead of reducing them to icons.
+const fullPageArt=new Set(['ichimatsu','sakura','nanohana','asagao','goldfish','momiji','snow-garden','camellia','moon','mimosa','tulip','seaside','lemon','autumn-leaf','woodland','snowflake','christmas']);
 export function templateArtPath(id:string,art:string|undefined){
-  return art?`/template-art/${art}.png${id==='ichimatsu'?'?v=20260908':''}`:'';
+  return art?`/template-art/${art}.png${fullPageArt.has(id)?'?v=20260913':''}`:'';
 }
 // Original vector artwork. All coordinates are in millimetres; no external assets or fonts.
 function Leaf({x,y,angle=0,color='#7c9a77',size=1}:{x:number;y:number;angle?:number;color?:string;size?:number}){
@@ -51,17 +55,19 @@ export function PaperDecoration({design,width,height,writingMode}:{design:string
   const vertical=writingMode==='vertical';
   const art=generatedArt[id];
   const artPath=templateArtPath(id,art);
+  const useFullPageArt=fullPageArt.has(id);
   return <svg className="paper-decoration" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-    {artPath&&<image href={artPath} x={vertical?0:width-46} y="0" width="46" height="46" opacity={continuation?.32:.58} preserveAspectRatio="xMinYMin meet"/>}
-    {id==='washi'?<g stroke="#c4c0ab" strokeWidth=".12" opacity=".22">{Array.from({length:50},(_,i)=>{const x=(i*43.27)%width,y=(i*61.7)%height;return <path key={i} d={`M${x} ${y}l${2+i%3} ${.7-i%2}`}/>;})}</g>:
-    id==='ichimatsu'&&!art?<g fill="#597e9c" opacity={continuation?.14:.22}>{Array.from({length:Math.floor(width/5)-2},(_,i)=><g key={i}><rect x={5+i*5} y={i%2?5:10} width="5" height="5"/><rect x={5+i*5} y={height-(i%2?10:15)} width="5" height="5"/></g>)}</g>:
-    id==='classic'?<g fill="none" stroke="#b3a98e" strokeWidth=".3" opacity={continuation?.48:.75}><rect x="8" y="8" width={width-16} height={height-16}/>{[[8,8,0],[width-8,8,90],[width-8,height-8,180],[8,height-8,270]].map(([x,y,a],i)=><path key={i} transform={`translate(${x} ${y}) rotate(${a})`} d="M2 14V2H14M4 8Q8 8 8 4M4 4Q4 11 11 11Q11 4 4 4"/>)}</g>:
-    id==='dots'?<g opacity={continuation?.35:.6}>{Array.from({length:Math.floor(width/14)},(_,i)=><g key={i} fill={['#d1b6c1','#b3cbd0','#d9cfaa','#c4bdd8'][i%4]}><circle cx={8+i*14} cy={6+i%3*2} r={1.2+i%2*.5}/><circle cx={14+i*14} cy={height-7-i%3} r="1.5"/></g>)}</g>:
-    <g opacity={continuation?.5:.82}>
+    {useFullPageArt&&artPath&&<image href={artPath} x="0" y="0" width={width} height={height} opacity={continuation?.38:.68} preserveAspectRatio="xMidYMid meet"/>}
+    {!useFullPageArt&&artPath&&<image href={artPath} x={vertical?0:width-46} y="0" width="46" height="46" opacity={continuation?.32:.58} preserveAspectRatio="xMinYMin meet"/>}
+    {id==='washi'&&<g stroke="#c4c0ab" strokeWidth=".12" opacity=".22">{Array.from({length:50},(_,i)=>{const x=(i*43.27)%width,y=(i*61.7)%height;return <path key={i} d={`M${x} ${y}l${2+i%3} ${.7-i%2}`}/>;})}</g>}
+    {id==='ichimatsu'&&!art&&<g fill="#597e9c" opacity={continuation?.14:.22}>{Array.from({length:Math.floor(width/5)-2},(_,i)=><g key={i}><rect x={5+i*5} y={i%2?5:10} width="5" height="5"/><rect x={5+i*5} y={height-(i%2?10:15)} width="5" height="5"/></g>)}</g>}
+    {id==='classic'&&<g fill="none" stroke="#b3a98e" strokeWidth=".3" opacity={continuation?.48:.75}><rect x="8" y="8" width={width-16} height={height-16}/>{[[8,8,0],[width-8,8,90],[width-8,height-8,180],[8,height-8,270]].map(([x,y,a],i)=><path key={i} transform={`translate(${x} ${y}) rotate(${a})`} d="M2 14V2H14M4 8Q8 8 8 4M4 4Q4 11 11 11Q11 4 4 4"/>)}</g>}
+    {id==='dots'&&<g opacity={continuation?.35:.6}>{Array.from({length:Math.floor(width/14)},(_,i)=><g key={i} fill={['#d1b6c1','#b3cbd0','#d9cfaa','#c4bdd8'][i%4]}><circle cx={8+i*14} cy={6+i%3*2} r={1.2+i%2*.5}/><circle cx={14+i*14} cy={height-7-i%3} r="1.5"/></g>)}</g>}
+    {!useFullPageArt&&!['washi','ichimatsu','classic','dots'].includes(id)&&<g opacity={continuation?.5:.82}>
       {!continuation&&<g transform={`translate(${vertical?6:width-38} 3) scale(.62)`}><Motif id={id} paper={template.paper}/></g>}
       <g transform={`translate(${vertical?width-40:8} ${height-25}) scale(${continuation?.46:.58})`}><Motif id={id} paper={template.paper}/></g>
       {!continuation&&<g transform={`translate(${vertical?7:width-27} ${height*.55}) scale(.31)`}><Motif id={id} paper={template.paper}/></g>}
     </g>}
-    {artPath&&<image href={artPath} x={vertical?width-46:0} y={height-46} width="46" height="46" opacity={continuation?.22:.42} preserveAspectRatio="xMinYMax meet" transform={vertical?'rotate(180 '+(width/2)+' '+(height/2)+')':undefined}/>}
+    {!useFullPageArt&&artPath&&<image href={artPath} x={vertical?width-46:0} y={height-46} width="46" height="46" opacity={continuation?.22:.42} preserveAspectRatio="xMinYMax meet" transform={vertical?'rotate(180 '+(width/2)+' '+(height/2)+')':undefined}/>}
   </svg>;
 }

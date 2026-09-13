@@ -49,11 +49,13 @@
           "Japanese"
         ],
         "displayLanguageSelector": false,
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "installerHooks": "windows/file-association-icon.nsh"
       }
     },
     "resources": {
-      "../public/legal/": "legal/"
+      "../public/legal/": "legal/",
+      "icons/binsen-document.ico": "icons/binsen-document.ico"
     },
     "publisher": "Y-TEC",
     "license": "Apache-2.0"

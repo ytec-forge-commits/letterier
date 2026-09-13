@@ -17,8 +17,12 @@ test('白の和紙は画像なし、生成素材はテンプレート間で共�
 test('藍の市松素材はチェッカー柄を背景に焼き込まずRGBA透過である',()=>{
   expect(pngColorType(fileURLToPath(new URL('../public/template-art/ichimatsu.png',import.meta.url)))).toBe(6);
 });
-test('藍の市松素材は更新後のURLを使い古いキャッシュを表示しない',()=>{
-  expect(templateArtPath('ichimatsu',generatedArt.ichimatsu)).toBe('/template-art/ichimatsu.png?v=20260908');
+test('描き直した便箋素材は更新後のURLを使い古いキャッシュを表示しない',()=>{
+  for(const id of ['ichimatsu','sakura','nanohana','asagao','goldfish','momiji','snow-garden','camellia','moon','mimosa','tulip','seaside','lemon','autumn-leaf','woodland','snowflake','christmas']){
+    expect(generatedArt[id]).toBe(id);
+    expect(pngColorType(fileURLToPath(new URL(`../public/template-art/${id}.png`,import.meta.url)))).toBe(6);
+    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-art/${id}.png?v=20260913`);
+  }
 });
 test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備える',()=>{
   expect(templates).toHaveLength(20);expect(appThemes).toHaveLength(21);
