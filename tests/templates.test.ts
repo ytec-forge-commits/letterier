@@ -1,9 +1,9 @@
 import {expect,test} from 'vitest';
-import {bodyText,newProject,replaceRange} from '../src/core/model';
+import {bodyText,newProject,paperSize,replaceRange} from '../src/core/model';
 import {packProject,unpackProject} from '../src/core/archive';
 import {compose} from '../src/core/compose';
-import {templates,createFromTemplate,makeUserTemplate,appThemes} from '../src/core/templates';
-import {decorationMotifPlacement,generatedArt,templateArtPath} from '../src/ui/PaperDecoration';
+import {templates,createFromTemplate,applyTemplateDesign,makeUserTemplate,appThemes} from '../src/core/templates';
+import {decorationMotifLayout,generatedArt,templateArtPath} from '../src/ui/PaperDecoration';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
@@ -31,34 +31,46 @@ test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備
 test('画面テーマは便箋画像を持たず配色だけで選べる',()=>{
   expect(appThemes.every(theme=>!('previewDesign' in theme))).toBe(true);
 });
-test('便箋イラストは大画像の断片ではなく本文外のワンポイント1点として配置する',()=>{
-  const horizontal=decorationMotifPlacement(210,297,'horizontal',false);
-  const vertical=decorationMotifPlacement(210,297,'vertical',false);
-  const continuation=decorationMotifPlacement(210,297,'horizontal',true);
-  expect(horizontal).toEqual({x:176,y:263,width:30,height:30,reserved:{top:20,right:36,bottom:36,left:20}});
-  expect(vertical).toEqual({x:4,y:4,width:30,height:30,reserved:{top:36,right:20,bottom:20,left:36}});
-  expect(continuation).toEqual({x:182,y:269,width:24,height:24,reserved:{top:20,right:30,bottom:30,left:20}});
-  for(const placement of [horizontal,vertical,continuation]){
-    const body={left:placement.reserved.left,top:placement.reserved.top,right:210-placement.reserved.right,bottom:297-placement.reserved.bottom};
-    const overlaps=placement.x<body.right&&placement.x+placement.width>body.left&&placement.y<body.bottom&&placement.y+placement.height>body.top;
-    expect(overlaps).toBe(false);
+test('便箋ごとに角・対角・左右・フッターを使い分け、本文安全域へ重ねない',()=>{
+  const signatures=new Set<string>();
+  for(const id of Object.keys(generatedArt))for(const [width,height] of [[210,297],[297,210]] as const){
+    const layout=decorationMotifLayout(id,width,height,'vertical',false);
+    signatures.add(layout.pattern);
+    expect(Math.max(...layout.placements.map(p=>Math.max(p.width,p.height))),`${id} ${width}x${height} の主モチーフ`).toBeGreaterThanOrEqual(40);
+    const body={left:layout.reserved.left,top:layout.reserved.top,right:width-layout.reserved.right,bottom:height-layout.reserved.bottom};
+    for(const motif of layout.placements){
+      const overlaps=motif.x<body.right&&motif.x+motif.width>body.left&&motif.y<body.bottom&&motif.y+motif.height>body.top;
+      expect(overlaps,`${id} ${width}x${height}`).toBe(false);
+    }
   }
+  expect(signatures.size).toBeGreaterThanOrEqual(5);
+  expect(decorationMotifLayout('sakura',210,297,'vertical',false).placements.length).toBe(2);
+  const footer=decorationMotifLayout('seaside',297,210,'horizontal',false).placements;
+  expect(Math.max(...footer.map(p=>p.x+p.width))-Math.min(...footer.map(p=>p.x))).toBeGreaterThan(297*.7);
 });
 test('イラスト付き便箋は書字方向に応じてワンポイント用の本文余白を確保する',()=>{
   const horizontal=createFromTemplate('lemon','horizontal');
   const vertical=createFromTemplate('lemon','vertical');
-  expect(horizontal.pages[0].ruling.margins).toEqual({top:20,right:36,bottom:36,left:20});
-  expect(horizontal.continuation.ruling.margins).toEqual({top:20,right:30,bottom:30,left:20});
-  expect(vertical.pages[0].ruling.margins).toEqual({top:36,right:20,bottom:20,left:36});
+  expect(horizontal.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',false).reserved);
+  expect(horizontal.continuation.ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',true).reserved);
+  expect(vertical.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'vertical',false).reserved);
   expect(createFromTemplate('washi').pages[0].ruling.margins).toEqual({top:20,right:20,bottom:20,left:20});
 });
 test('旧版の標準余白で保存されたイラスト便箋だけを安全余白へ補正する',()=>{
   const old=newProject();old.templateId='lemon';old.settings.writingMode='horizontal';old.pages[0].design='lemon-first';old.continuation.design='lemon-continuation';
   const restored=unpackProject(packProject(old));
-  expect(restored.pages[0].ruling.margins).toEqual({top:20,right:36,bottom:36,left:20});
-  expect(restored.continuation.ruling.margins).toEqual({top:20,right:30,bottom:30,left:20});
+  expect(restored.pages[0].ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',false).reserved);
+  expect(restored.continuation.ruling.margins).toEqual(decorationMotifLayout('lemon',210,297,'horizontal',true).reserved);
   old.pages[0].ruling.margins={top:18,right:22,bottom:25,left:19};
   expect(unpackProject(packProject(old)).pages[0].ruling.margins).toEqual({top:18,right:22,bottom:25,left:19});
+});
+test('既存文書へ便箋を適用すると用紙サイズと縦横に合う余白を使う',()=>{
+  const source=newProject();source.settings.paper='POSTCARD';source.settings.orientation='landscape';source.pages.push({...structuredClone(source.continuation),id:'page-2'});
+  const applied=applyTemplateDesign(source,'seaside'),{width,height}=paperSize(applied);
+  expect([width,height]).toEqual([148,100]);
+  expect(applied.pages[0].ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',false).reserved);
+  expect(applied.pages[1].ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',true).reserved);
+  expect(applied.continuation.ruling.margins).toEqual(decorationMotifLayout('seaside',width,height,'horizontal',true).reserved);
 });
 test('全20種で縦横・最初と続きのデザインを文書として保存できる',()=>{
   expect(templates.length).toBe(20);

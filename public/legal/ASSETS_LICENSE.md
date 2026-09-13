@@ -33,6 +33,12 @@
 
 `public/template-art/` のPNGは、レタリエのテンプレート装飾用にCodex ImageGenで生成したオリジナル素材です（生成日: 2026-09-08）。文字・ロゴ・透かしは含めず、アプリ内のテンプレート表示にのみ使用します。生成サービスの利用条件および再配布条件は、配布時点のサービス規約を確認してください。
 
+`public/template-motifs/` の透過PNGは、本文領域の外へ配置するレタリエ専用ワンポイントとしてCodex ImageGenで生成したオリジナル素材です（生成日: 2026-09-13）。
+
+## ヘッダーロゴ（生成・ブランド素材）
+
+`public/brand/letterier-header-logo.png` は、レタリエのヘッダー表示用にCodex ImageGenで生成したオリジナル素材です（生成日: 2026-09-14、SHA-256: `8401860FBB97C8FE9FF564877F09F4AC3EEB14D46270E0FD1F675865547C38F4`）。名称・製品アイコンと同様にブランド資産として扱い、利用条件は `BRAND_POLICY.md` に従います。
+
 | ファイル | 適用テンプレート | SHA-256 |
 | --- | --- | --- |
 | `sakura.png` | sakura / nanohana / mimosa / tulip / dots | `93476BD01E96F924CE81397B0CDA843AFB211672E498F96362847A1BEA3041D7` |

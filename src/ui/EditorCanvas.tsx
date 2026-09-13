@@ -42,7 +42,7 @@ export function EditorCanvas(props:Props) {
       const pageNodes=focusPage===undefined||!isFocus?nodes:nodes.filter(n=>n.closest('.page-edit')?.getAttribute('aria-label')===`手紙の本文 ${focusPage+1}ページ`);
       const lineNodes=focusLine===undefined||!isFocus?pageNodes:pageNodes.filter(n=>(n.closest('.body-line') as HTMLElement|null)?.dataset.lineIndex===String(focusLine));
       const candidates=[lineNodes,pageNodes,nodes].map(list=>list.filter(n=>Number(n.dataset.offset)<=offset&&Number(n.dataset.end)>=offset)).find(list=>list.length)??[];
-      const candidateIndex=pickCaretCandidate(candidates.map(n=>({start:Number(n.dataset.offset),end:Number(n.dataset.end),empty:n.dataset.empty!==undefined})),offset,rangeSelection.start===rangeSelection.end&&preferTextEnd.current===offset);
+      const candidateIndex=pickCaretCandidate(candidates.map(n=>({start:Number(n.dataset.offset),end:Number(n.dataset.end),empty:n.dataset.empty!==undefined,separator:n.dataset.separator!==undefined})),offset,rangeSelection.start===rangeSelection.end&&preferTextEnd.current===offset);
       const node=candidates[candidateIndex]??nodes.at(-1);
       return node?.firstChild?{node:node.firstChild,offset:node.dataset.empty!==undefined?0:Math.max(0,Math.min(offset-Number(node.dataset.offset),node.textContent?.length??0))}:null;
     };

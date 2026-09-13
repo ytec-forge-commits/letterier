@@ -17,3 +17,6 @@ export function dropObjectOnPage(pointerX:number,pointerY:number,grab:{x:number;
   const x=(pointerX-page.left)/unit-grab.x,y=(pointerY-page.top)/unit-grab.y;
   return {x:Math.max(0,Math.min(pageWidth-objectWidth,x)),y:Math.max(0,Math.min(pageHeight-objectHeight,y))};
 }
+export function dragGhostRect(pointerX:number,pointerY:number,grab:{x:number;y:number},unit:number,objectWidth:number,objectHeight:number){
+  return {left:pointerX-grab.x*unit,top:pointerY-grab.y*unit,width:objectWidth*unit,height:objectHeight*unit};
+}

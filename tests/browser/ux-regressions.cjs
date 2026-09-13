@@ -3,10 +3,11 @@ async (page) => {
   await page.goto('http://127.0.0.1:1420/');
   await page.getByRole('button',{name:'PDF・印刷',exact:true}).waitFor();
   if(await page.locator('[name=document-title]').count())throw new Error('上部に不要な手紙名入力欄が残っています。');
+  if(!await page.locator('.brand-logo-image').count())throw new Error('専用のレタリエロゴ画像がありません。');
   const header=await page.locator('.app-header').evaluate(element=>({scrollWidth:element.scrollWidth,clientWidth:element.clientWidth}));
   if(header.scrollWidth>header.clientWidth)throw new Error('上部メニューが横にはみ出しています。');
-  const pdfLines=await page.getByRole('button',{name:'PDF・印刷',exact:true}).evaluate(element=>Math.round(element.getBoundingClientRect().height/parseFloat(getComputedStyle(element).lineHeight)));
-  if(pdfLines>3)throw new Error('PDF・印刷ボタンが二行になっています。');
+  const pdfLines=await page.getByRole('button',{name:'PDF・印刷',exact:true}).evaluate(element=>{const range=document.createRange();range.selectNodeContents(element);return range.getClientRects().length;});
+  if(pdfLines>1)throw new Error('PDF・印刷ボタンが二行になっています。');
   if(!await page.getByText('標準フォント',{exact:true}).count())throw new Error('標準フォント設定がありません。');
   if(!await page.getByRole('button',{name:'このページの本文を揃える',exact:true}).count())throw new Error('ページ単位の一括フォント変更がありません。');
   await page.getByRole('button',{name:'ファイル',exact:true}).click();

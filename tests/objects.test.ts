@@ -2,7 +2,7 @@ import {expect,test} from 'vitest';
 import {newProject,replaceRange,type FloatingObject} from '../src/core/model';
 import {compose} from '../src/core/compose';
 import {changeWritingMode,moveFixedObjectToPage} from '../src/core/objects';
-import {autoScrollDelta,dropObjectOnPage,nearestPageIndex} from '../src/core/object-drag';
+import {autoScrollDelta,dragGhostRect,dropObjectOnPage,nearestPageIndex} from '../src/core/object-drag';
 import {packProject,unpackProject} from '../src/core/archive';
 
 test('本文を全削除してもページ固定文字箱の位置と保存可能性を保つ',()=>{
@@ -38,4 +38,7 @@ test('画像ドラッグが表示領域の上下端へ近づくほど自動ス�
   expect(autoScrollDelta(105,100,700)).toBeLessThan(0);
   expect(autoScrollDelta(400,100,700)).toBe(0);
   expect(autoScrollDelta(695,100,700)).toBeGreaterThan(0);
+});
+test('ページ外へドラッグ中も画像プレビューをポインター位置に保つ',()=>{
+  expect(dragGhostRect(320,740,{x:12,y:8},2,60,40)).toEqual({left:296,top:724,width:120,height:80});
 });

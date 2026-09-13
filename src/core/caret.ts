@@ -1,10 +1,10 @@
 import type {Layout,LayoutLine} from './compose';
 import {graphemes} from './layout';
-export interface CaretCandidate {start:number;end:number;empty:boolean}
+export interface CaretCandidate {start:number;end:number;empty:boolean;separator?:boolean}
 export function pickCaretCandidate(candidates:CaretCandidate[],offset:number,preferTextEnd:boolean):number{
  const contains=candidates.findIndex(candidate=>candidate.start<=offset&&candidate.end>offset);
  if(contains>=0)return contains;
- if(preferTextEnd){for(let index=candidates.length-1;index>=0;index--)if(!candidates[index].empty&&candidates[index].end===offset)return index;}
+ if(preferTextEnd){for(let index=candidates.length-1;index>=0;index--)if(!candidates[index].empty&&!candidates[index].separator&&candidates[index].end===offset)return index;}
  const begins=candidates.findIndex(candidate=>candidate.start===offset);if(begins>=0)return begins;
  for(let index=candidates.length-1;index>=0;index--)if(candidates[index].end===offset)return index;
  return candidates.length-1;

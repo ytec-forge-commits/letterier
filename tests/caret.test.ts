@@ -23,3 +23,11 @@ test('IME確定後は同じ位置の空き列より直前の文字末尾へキ�
   expect(pickCaretCandidate(candidates,12,true)).toBe(0);
   expect(pickCaretCandidate(candidates,12,false)).toBe(1);
 });
+test('改行直後は区切り文字の末尾ではなく次の空行先頭へキャレットを戻す',()=>{
+  const candidates=[
+    {start:0,end:2,empty:false,separator:false},
+    {start:2,end:3,empty:false,separator:true},
+    {start:3,end:3,empty:true,separator:false},
+  ];
+  expect(pickCaretCandidate(candidates,3,true)).toBe(2);
+});

@@ -1,6 +1,6 @@
-import {cloneProject,newProject,clone,uid,type Project,type WritingMode} from './model';
+import {cloneProject,newProject,clone,paperSize,uid,type Project,type WritingMode} from './model';
 import {compose,type Measure} from './compose';
-import {decorationMotifPlacement,illustratedTemplateIds} from './stationery-layout';
+import {decorationMotifLayout,illustratedTemplateIds} from './stationery-layout';
 export interface Template {id:string;name:string;family:'和風'|'洋風';season:'通年'|'春'|'夏'|'秋'|'冬';description:string;color:string;accent:string;paper:string}
 const catalog=[
   ['washi','白の和紙','白に近い和紙の質感と、静かな細い罫線。','#a6b5aa','#405c4c','#fffefa'],
@@ -31,14 +31,20 @@ export function createFromTemplate(id:string,mode:WritingMode='horizontal'):Proj
   const t=templates.find(t=>t.id===id);if(!t)throw new Error('この便箋テンプレートが見つかりません。');
   const p=newProject();p.templateId=id;p.settings.writingMode=mode;
   p.pages[0].design=`${id}-first`;p.pages[0].background.color=t.paper;p.pages[0].ruling.color=t.color;
-  if(illustratedTemplateIds.has(id))p.pages[0].ruling.margins=decorationMotifPlacement(210,297,mode,false).reserved;
+  if(illustratedTemplateIds.has(id))p.pages[0].ruling.margins=decorationMotifLayout(id,210,297,mode,false).reserved;
   p.continuation={...clone(p.pages[0]),id:uid(),design:`${id}-continuation`};
-  if(illustratedTemplateIds.has(id))p.continuation.ruling.margins=decorationMotifPlacement(210,297,mode,true).reserved;
+  if(illustratedTemplateIds.has(id))p.continuation.ruling.margins=decorationMotifLayout(id,210,297,mode,true).reserved;
   return p;
 }
 export function applyTemplateDesign(p:Project,id:string):Project{
   const template=createFromTemplate(id,p.settings.writingMode),next=cloneProject(p);
-  next.templateId=id;next.pages=next.pages.map((page,index)=>({...clone(index?template.continuation:template.pages[0]),id:page.id}));next.continuation=clone(template.continuation);return next;
+  next.templateId=id;next.pages=next.pages.map((page,index)=>({...clone(index?template.continuation:template.pages[0]),id:page.id}));next.continuation=clone(template.continuation);
+  if(illustratedTemplateIds.has(id)){
+    const {width,height}=paperSize(next),reserved=(continuation:boolean)=>decorationMotifLayout(id,width,height,next.settings.writingMode,continuation).reserved;
+    next.pages=next.pages.map((visual,index)=>({...visual,ruling:{...visual.ruling,margins:reserved(index>0)}}));
+    next.continuation={...next.continuation,ruling:{...next.continuation.ruling,margins:reserved(true)}};
+  }
+  return next;
 }
 export function makeUserTemplate(p:Project,withText:boolean,measure:Measure):Project{
   const next=cloneProject(p),layout=compose(p,measure);next.id=uid();next.title='新しい手紙';
