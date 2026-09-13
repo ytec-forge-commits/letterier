@@ -1,0 +1,35 @@
+{
+  "name": "binsen-kobo",
+  "description": "レタリエ — 手紙・便箋作成アプリ",
+  "private": true,
+  "version": "1.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "tauri": "node scripts/native.mjs tauri",
+    "test:native": "node scripts/native.mjs cargo test",
+    "build:native": "node scripts/native.mjs tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.11.1",
+    "@xmldom/xmldom": "^0.9.12",
+    "ag-psd": "^31.0.2",
+    "fflate": "0.8.3",
+    "pdfjs-dist": "^6.3.289",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.3",
+    "vite": "8.2.2",
+    "vitest": "5.0.0"
+  }
+}

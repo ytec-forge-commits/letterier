@@ -1,0 +1,8 @@
+MPL-2.0 covered libraries are unmodified. Their exact corresponding source, including existing notices, is provided in MPL-Corresponding-Source.zip alongside this notice.
+You may use, modify and distribute those files under MPL-2.0. The larger application is licensed separately under Apache-2.0.
+
+cssparser-0.36.0
+cssparser-macros-0.6.1
+dtoa-short-0.3.5
+option-ext-0.2.0
+selectors-0.36.1

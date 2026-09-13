@@ -1,0 +1,4 @@
+import {expect,it} from 'vitest';
+import {inspectPsd,designFormat} from '../src/core/design-image';
+it('rejects huge, high depth, and CMYK PSD before decoding',()=>{const b=new Uint8Array(26),v=new DataView(b.buffer);b.set([56,66,80,83]);v.setUint16(4,1);v.setUint16(12,4);v.setUint32(14,100);v.setUint32(18,200);v.setUint16(22,8);v.setUint16(24,3);expect(inspectPsd(b)).toEqual({width:200,height:100});v.setUint32(18,100000);expect(()=>inspectPsd(b)).toThrow();v.setUint32(18,200);v.setUint16(22,16);expect(()=>inspectPsd(b)).toThrow(/8bit/);v.setUint16(22,8);v.setUint16(24,4);expect(()=>inspectPsd(b)).toThrow(/RGB/);});
+it('requires PDF-compatible AI and detects supported HEIF brands',()=>{expect(designFormat(new TextEncoder().encode('%PDF-1.7'),'a.ai')).toBe('ai');expect(()=>designFormat(new TextEncoder().encode('%!PS-Adobe'),'a.ai')).toThrow(/PDF互換/);const b=new TextEncoder().encode('\0\0\0\u0018ftypheic\0\0\0\0');expect(designFormat(b,'a.heic')).toBe('heic');});
