@@ -25,7 +25,7 @@ test('描き直した便箋素材は更新後のURLを使い古いキャッシ�
     expect(generatedCompanionArt[id]).toBe(`${id}-companion`);
     expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}.png`,import.meta.url)))).toBe(6);
     expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}-companion.png`,import.meta.url)))).toBe(6);
-    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=1.0.2`);
+    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=1.0.3`);
   }
 });
 test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備える',()=>{
@@ -35,24 +35,18 @@ test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備
 test('画面テーマは便箋画像を持たず配色だけで選べる',()=>{
   expect(appThemes.every(theme=>!('previewDesign' in theme))).toBe(true);
 });
-test('便箋ごとに四隅・左右・上辺・フッターを使い分け、固定本文領域へ重ねない',()=>{
-  const signatures=new Set<string>();
-  for(const id of Object.keys(generatedArt))for(const [width,height] of [[210,297],[297,210]] as const){
-    const layout=decorationMotifLayout(id,width,height,'vertical',false);
-    signatures.add(layout.pattern);
-    expect(layout.reserved).toEqual({top:20,right:20,bottom:20,left:20});
-    expect(layout.placements,`${id} ${width}x${height} で主役と脇役を一度ずつ使う`).toHaveLength(2);
-    expect(new Set(layout.placements.map(p=>p.art))).toEqual(new Set(['primary','companion']));
-    expect(Math.max(...layout.placements.map(p=>Math.max(p.width,p.height))),`${id} ${width}x${height} の主モチーフ`).toBeGreaterThanOrEqual(15);
-    const body={left:20,top:20,right:width-20,bottom:height-20};
-    for(const motif of layout.placements){
-      const overlaps=motif.x<body.right&&motif.x+motif.width>body.left&&motif.y<body.bottom&&motif.y+motif.height>body.top;
-      expect(overlaps,`${id} ${width}x${height}`).toBe(false);
-    }
+test('1.0.1の淡い対角構図を主役と脇役の別イラストで再現し、本文領域は狭めない',()=>{
+  for(const id of Object.keys(generatedArt))for(const [width,height] of [[210,297],[297,210]] as const)for(const mode of ['horizontal','vertical'] as const){
+    const first=decorationMotifLayout(id,width,height,mode,false),continuation=decorationMotifLayout(id,width,height,mode,true);
+    expect(first.pattern).toBe('classic-diagonal');
+    expect(first.reserved).toEqual({top:20,right:20,bottom:20,left:20});
+    expect(first.placements.map(p=>p.art),`${id} ${mode} で別々の主役・脇役を使う`).toEqual(['primary','companion']);
+    expect(first.placements.map(p=>[p.width,p.height,p.opacity])).toEqual([[46,46,.58],[46,46,.42]]);
+    expect(continuation.placements.map(p=>[p.width,p.height,p.opacity])).toEqual([[46,46,.32],[46,46,.22]]);
+    const expected=mode==='horizontal'?[[width-46,0],[0,height-46]]:[[0,0],[width-46,height-46]];
+    expect(first.placements.map(p=>[p.x,p.y]),`${id} ${width}x${height} ${mode}`).toEqual(expected);
+    expect(continuation.placements.map(p=>[p.x,p.y])).toEqual(expected);
   }
-  expect(signatures.size).toBeGreaterThanOrEqual(6);
-  const footerIds=['goldfish','snow-garden','tulip','seaside'];
-  expect(new Set(footerIds.map(id=>decorationMotifLayout(id,297,210,'horizontal',false).placements[0].x)).size).toBeGreaterThanOrEqual(3);
 });
 test('どの便箋・書字方向でも本文領域の広さを変えない',()=>{
   const standard={top:20,right:20,bottom:20,left:20};

@@ -1,6 +1,6 @@
 # Letterier User Manual
 
-For version 1.0.2 / Windows 10 and 11, 64-bit
+For version 1.0.3 / Windows 10 and 11, 64-bit
 
 Letterier lets you write directly on stationery, add photos or text boxes, and finish your letter as a PDF or a printed page. Letters and images stay on your computer, and ordinary use does not require an internet connection.
 

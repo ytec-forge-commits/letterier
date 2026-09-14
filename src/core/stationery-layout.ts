@@ -2,57 +2,22 @@ import {paperSize,type Margins,type PageVisual,type Project,type WritingMode} fr
 
 export const illustratedTemplateIds=new Set(['ichimatsu','sakura','nanohana','asagao','goldfish','momiji','moon','snow-garden','camellia','mimosa','tulip','seaside','lemon','autumn-leaf','woodland','snowflake','christmas']);
 
-export type DecorationPattern='corner-pair'|'corner-right'|'side-left'|'side-right'|'top-rhythm'|'footer-rhythm'|'four-corners';
+export type DecorationPattern='classic-diagonal';
 export interface DecorationMotifPlacement {art:'primary'|'companion';x:number;y:number;width:number;height:number;rotation:number;opacity:number}
 export interface DecorationMotifLayout {pattern:DecorationPattern;placements:DecorationMotifPlacement[];reserved:Margins}
 
 export const stationeryBodyMargins:Margins={top:20,right:20,bottom:20,left:20};
 
-const patterns:Record<DecorationPattern,Set<string>>={
-  'corner-pair':new Set(['sakura','momiji','autumn-leaf']),
-  'corner-right':new Set(['moon','camellia','mimosa']),
-  'side-left':new Set(['ichimatsu','woodland']),
-  'side-right':new Set(['asagao','lemon']),
-  'top-rhythm':new Set(['nanohana','snowflake']),
-  'footer-rhythm':new Set(['goldfish','snow-garden','tulip','seaside']),
-  'four-corners':new Set(['christmas']),
-};
 const round=(value:number)=>Math.round(value*100)/100;
-function patternFor(id:string):DecorationPattern{return (Object.entries(patterns).find(([,ids])=>ids.has(id))?.[0] as DecorationPattern|undefined)??'corner-pair';}
 
-export function decorationMotifLayout(id:string,pageWidth:number,pageHeight:number,_writingMode:WritingMode,continuation:boolean):DecorationMotifLayout {
-  type Zone='top-left'|'top-center'|'top-right'|'middle-left'|'middle-right'|'bottom-left'|'bottom-quarter'|'bottom-center'|'bottom-right';
-  const pattern=patternFor(id),outer=1,primarySize=continuation?15:18,companionSize=continuation?9.5:11.5;
-  const zones:Record<string,[Zone,Zone]>= {
-    ichimatsu:['middle-left','top-right'],sakura:['top-left','bottom-right'],nanohana:['bottom-left','top-right'],
-    asagao:['top-right','bottom-left'],goldfish:['bottom-right','bottom-left'],momiji:['top-right','bottom-left'],
-    moon:['top-right','top-left'],'snow-garden':['bottom-left','top-right'],camellia:['bottom-right','top-left'],
-    mimosa:['top-left','bottom-right'],tulip:['bottom-center','top-right'],seaside:['bottom-quarter','top-right'],
-    lemon:['top-right','bottom-left'],'autumn-leaf':['top-left','bottom-right'],woodland:['bottom-left','top-right'],
-    snowflake:['top-center','bottom-right'],christmas:['top-right','bottom-left'],
-  };
-  const point=(zone:Zone,size:number):[number,number]=>{
-    const left=outer,right=pageWidth-size-outer,top=outer,bottom=pageHeight-size-outer;
-    if(zone==='top-left')return [left,top];
-    if(zone==='top-center')return [(pageWidth-size)/2,top];
-    if(zone==='top-right')return [right,top];
-    if(zone==='middle-left')return [left,(pageHeight-size)/2];
-    if(zone==='middle-right')return [right,(pageHeight-size)/2];
-    if(zone==='bottom-left')return [left,bottom];
-    if(zone==='bottom-quarter')return [(pageWidth-size)*.25,bottom];
-    if(zone==='bottom-center')return [(pageWidth-size)/2,bottom];
-    return [right,bottom];
-  };
-  const [primaryZone,companionZone]=zones[id]??['top-left','bottom-right'];
-  const motif=(art:'primary'|'companion',zone:Zone,size:number,opacity:number):DecorationMotifPlacement=>{
-    const [x,y]=point(zone,size);
-    return {art,x:round(x),y:round(y),width:size,height:size,rotation:0,opacity};
-  };
+export function decorationMotifLayout(_id:string,pageWidth:number,pageHeight:number,writingMode:WritingMode,continuation:boolean):DecorationMotifLayout {
+  const size=46,vertical=writingMode==='vertical';
+  const motif=(art:'primary'|'companion',x:number,y:number,opacity:number):DecorationMotifPlacement=>({art,x:round(x),y:round(y),width:size,height:size,rotation:0,opacity});
   return {
-    pattern,
+    pattern:'classic-diagonal',
     placements:[
-      motif('primary',primaryZone,primarySize,continuation?.62:.9),
-      motif('companion',companionZone,companionSize,continuation?.48:.76),
+      motif('primary',vertical?0:pageWidth-size,0,continuation?.32:.58),
+      motif('companion',vertical?pageWidth-size:0,pageHeight-size,continuation?.22:.42),
     ],
     reserved:{...stationeryBodyMargins},
   };

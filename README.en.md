@@ -4,7 +4,7 @@ A local Windows application for writing letters directly on stationery, arrangin
 
 Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface switches between Japanese and English. Japanese horizontal and vertical writing and English horizontal writing are supported. Letters and images are processed locally; normal use requires no internet connection.
 
-The current version is **1.0.2**. See the [English user manual](docs/manual/en/README.md) for illustrated instructions.
+The current version is **1.0.3**. See the [English user manual](docs/manual/en/README.md) for illustrated instructions.
 
 ## Use
 

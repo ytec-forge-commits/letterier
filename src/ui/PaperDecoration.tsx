@@ -11,7 +11,7 @@ export const generatedCompanionArt:Record<string,string>=Object.fromEntries(
   Object.keys(generatedArt).map(id=>[id,`${id}-companion`]),
 );
 export function templateArtPath(_id:string,art:string|undefined){
-  return art?`/template-motifs/${art}.png?v=1.0.2`:'';
+  return art?`/template-motifs/${art}.png?v=1.0.3`:'';
 }
 // Original vector artwork. All coordinates are in millimetres; no external assets or fonts.
 function Leaf({x,y,angle=0,color='#7c9a77',size=1}:{x:number;y:number;angle?:number;color?:string;size?:number}){
