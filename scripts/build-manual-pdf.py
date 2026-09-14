@@ -51,6 +51,20 @@ def build(language: str):
 
     story = []
     paragraph = []
+    page_break_before = {
+        "画面の見方",
+        "縦書きで書く",
+        "ページを扱う",
+        "写真・画像を入れる",
+        "保存と回復",
+        "Screen overview",
+        "Write in English",
+        "Pages",
+        "Photos and images",
+        "Save and recover work",
+        "PDF保存と印刷",
+        "Save a PDF or print",
+    }
 
     def flush():
         if paragraph:
@@ -76,7 +90,10 @@ def build(language: str):
             continue
         if stripped.startswith("## "):
             flush()
-            story.append(Paragraph(inline(stripped[3:]), h2))
+            heading = stripped[3:]
+            if heading in page_break_before and story:
+                story.append(PageBreak())
+            story.append(Paragraph(inline(heading), h2))
             continue
         if stripped.startswith("- "):
             flush()
