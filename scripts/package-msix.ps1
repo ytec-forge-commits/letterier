@@ -23,11 +23,11 @@ $manifest = @"
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap uap10 rescap">
  <Identity Name="$identityXml" Publisher="$publisherXml" Version="$version" ProcessorArchitecture="x64" />
  <Properties><DisplayName>レタリエ</DisplayName><PublisherDisplayName>Y-TEC</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo></Properties>
- <Resources><Resource Language="ja-jp" /></Resources>
+ <Resources><Resource Language="ja-jp" /><Resource Language="en-us" /></Resources>
  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" /></Dependencies>
  <Applications><Application Id="LetterAtelier" Executable="レタリエ.exe" uap10:RuntimeBehavior="packagedClassicApp" uap10:TrustLevel="mediumIL">
   <uap:VisualElements DisplayName="レタリエ" Description="手紙・便箋作成アプリ" BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" />
-  <Extensions><uap:Extension Category="windows.fileTypeAssociation"><uap:FileTypeAssociation Name="binsen"><uap:DisplayName>レタリエの手紙</uap:DisplayName><uap:SupportedFileTypes><uap:FileType>.binsen</uap:FileType></uap:SupportedFileTypes></uap:FileTypeAssociation></uap:Extension></Extensions>
+  <Extensions><uap:Extension Category="windows.fileTypeAssociation"><uap:FileTypeAssociation Name="binsen"><uap:DisplayName>レタリエの手紙</uap:DisplayName><uap:Logo>Assets\binsen-document.png</uap:Logo><uap:SupportedFileTypes><uap:FileType>.binsen</uap:FileType></uap:SupportedFileTypes></uap:FileTypeAssociation></uap:Extension></Extensions>
  </Application></Applications>
  <Capabilities><rescap:Capability Name="runFullTrust" /></Capabilities>
 </Package>

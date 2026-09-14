@@ -22,8 +22,8 @@ WebView2はOSに導入されたものを利用します。NSISの既定のdownlo
 ./scripts/package-msix.ps1 -IdentityName <PartnerCenterのPackageIdentityName> -Publisher <PartnerCenterのPublisher>
 ```
 
-Windows 10 build 19041以上、x64、full-trust desktop process、`.binsen`関連付けを宣言します。Storeの表示名はレタリエ、起動ファイルはレタリエ.exeです。Store版はStore更新を使い、直接配布版と機能は共通です。公開Storeパッケージに自己署名証明書を強制しません。Privacy文書、説明、スクリーンショット、年齢区分、予約名、最新のStore審査条件は提出前にPartner Center上で確認します。
+Windows 10 build 19041以上、x64、full-trust desktop process、`.binsen`関連付けを宣言します。`.binsen` にはアプリ本体と区別できる文書用アイコンを指定します。Storeの表示名はレタリエ、起動ファイルはレタリエ.exeです。Store版はStore更新を使い、直接配布版と機能は共通です。公開Storeパッケージに自己署名証明書を強制しません。Privacy文書、説明、スクリーンショット、年齢区分、予約名、最新のStore審査条件は提出前にPartner Center上で確認します。
 
-現時点の未完了境界はMicrosoft Store向けの正式Identity/Publisher取得、MSIX生成・インストール・WACK、Partner Center提出です。Forge直接配布版の自己署名・検証・公開とは区別します。
+正式なPackage IdentityとPublisherはPartner Centerで取得済みです。提出用の掲載文・画像・認証メモ・設定案は `distribution/store-listing/` にまとめています。未署名MSIXの生成とWACKはローカルで実施できますが、Partner Centerでの申請開始、宣言の保存、パッケージアップロード、最終提出は、それぞれ実行直前の確認を経て行います。Forge直接配布版の自己署名・検証・公開とは区別します。
 
 参考：[Microsoftの手動MSIX作成手順](https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-manual-conversion)、[MakeAppx](https://learn.microsoft.com/en-us/windows/msix/package/create-app-package-with-makeappx-tool)。
