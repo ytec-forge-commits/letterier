@@ -19,6 +19,9 @@ const translations:Record<string,string>={
   '太字':'Bold','斜体':'Italic','下線':'Underline','文字の色':'Text color','縦中横':'Horizontal-in-vertical',
   '2桁数字を自動で横並び':'Automatically align 2-digit numbers','選んだ文字を横並びに':'Place selected characters horizontally','通常の縦配置':'Normal vertical layout','段落の1行だけを別ページに残さない':'Keep a single paragraph line from being left on another page',
   '閉じる':'Close','末尾にページを追加':'Add a page at the end','素材を読み込んでいます…':'Loading image…','保存データを処理しています…':'Processing saved data…',
+  '自由配置の文字箱':'Positioned text box','本文へ':'Back to body','文字箱の本文':'Text box content','文字箱の書字方向':'Text box writing direction','文字箱のフォント':'Text box font','文字箱のサイズ（pt）':'Text box size (pt)','文字箱の色':'Text box color',
+  '本文へ追従':'Flow with body','配置ページ':'Page','横位置（mm）':'Horizontal position (mm)','縦位置（mm）':'Vertical position (mm)','幅（mm）':'Width (mm)','高さ（mm）':'Height (mm)','回転（度）':'Rotation (degrees)','要素の不透明度':'Item opacity','本文を周囲へ回り込ませる':'Wrap body text around item','周囲の余白（mm）':'Surrounding margin (mm)','周囲の罫線を隠す':'Hide surrounding rules','最前面':'Bring to front','最背面':'Send to back','前面へ':'Bring forward','背面へ':'Send backward',
+  '位置は関連する本文からの距離です。':'Position is measured from its related body text.','位置は用紙の左上からの距離です。配置ページを選ぶと、画像・写真を別のページへ移動できます。':'Position is measured from the top-left of the page. Choose a page to move the image or photo.','画面上ではドラッグ、選択後は矢印キーでも移動できます。':'Drag on the page, or use the arrow keys after selecting the item.',
   '手紙の名前':'Letter name','保存ファイルと「最近使った手紙」に表示する名前です。':'This name appears in the saved file and Recent Letters.',
   'ファイルを開く…':'Open file…','.binsen または履歴付きバックアップ':'.binsen or backup with history','最近使った手紙':'Recent letters',
   '今すぐ保存':'Save now','名前を付けて保存…':'Save as…','現在の状態だけを保存':'Save the current state only',
@@ -78,6 +81,7 @@ const replacements:Array<[RegExp,string|((...args:string[])=>string)]>=[
   [/^(\d+)ページの操作$/,(_all,n)=>`Page ${n} operation`],[/^(\d+)ページの背景・罫線$/,(_all,n)=>`Page ${n} background and rules`],
   [/^本文 (\d+)文字$/,(_all,n)=>`Body: ${n} characters`],[/^本文の位置 (\d+)〜(\d+)$/,(_all,a,b)=>`Body range: ${a}-${b}`],[/^一緒に操作する要素 (\d+)個$/,(_all,n)=>`Items included: ${n}`],[/^(\d+)ページ目$/,(_all,n)=>`Position ${n}`],
   [/^背景画像の不透明度 (\d+)%$/,(_all,n)=>`Background image opacity: ${n}%`],[/^背景画像の倍率 (\d+)%$/,(_all,n)=>`Background image scale: ${n}%`],
+  [/^不透明度 (\d+)%$/,(_all,n)=>`Opacity: ${n}%`],
 ];
 
 export function translateUiText(value:string,language:UiLanguage):string{

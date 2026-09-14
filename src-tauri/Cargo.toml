@@ -1,6 +1,6 @@
 [package]
 name = "binsen-kobo"
-version = "1.0.3"
+version = "1.0.4"
 description = "レタリエ — 手紙・便箋作成アプリ"
 edition = "2021"
 rust-version = "1.85"

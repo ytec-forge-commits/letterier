@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type FormEvent, type KeyboardEvent, type MouseEvent } from 'react';
+import { useLayoutEffect, useRef, type FormEvent, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
 import { bodyText, type Project, type TextStyle, type FloatingObject } from '../core/model';
 import { graphemes } from '../core/layout';
 import { type Layout } from '../core/compose';
@@ -110,6 +110,8 @@ export function EditorCanvas(props:Props) {
   const clickPaper=(e:MouseEvent<HTMLDivElement>,index:number)=>{
     preferredInline.current=undefined;
     props.onPage(index);
+    const nativeSelection=readSelection();
+    if(nativeSelection&&nativeSelection.start!==nativeSelection.end){props.onSelection(nativeSelection);return;}
     if(e.target!==e.currentTarget){capture();return;}
     const bounds=e.currentTarget.getBoundingClientRect();
     const x=(e.clientX-bounds.left)*25.4/96/props.zoom,y=(e.clientY-bounds.top)*25.4/96/props.zoom;
@@ -118,7 +120,13 @@ export function EditorCanvas(props:Props) {
     const closest=lines.map((line,lineIndex)=>({line,lineIndex})).sort((a,b)=>Math.abs((vertical?a.line.x:a.line.y)-(vertical?x:y))-Math.abs((vertical?b.line.x:b.line.y)-(vertical?x:y)))[0];
     if(closest){const at={start:closest.line.end,end:closest.line.end};props.onSelection(at);restore(at,false,index,closest.lineIndex);}
   };
-  return <div className="paper-scroll" ref={root} onKeyDown={keyboard} onInput={handleInput} onDragOver={e=>e.preventDefault()} onDrop={e=>e.preventDefault()}
+  const beginBodySelection=(e:PointerEvent<HTMLDivElement>)=>{
+    if(!(e.target as Element).closest('.page-edit'))return;
+    const scroll=e.currentTarget;scroll.dataset.selectingBody='true';
+    const finish=()=>{delete scroll.dataset.selectingBody;window.removeEventListener('pointerup',finish);window.removeEventListener('pointercancel',finish);};
+    window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',finish);
+  };
+  return <div className="paper-scroll" ref={root} onPointerDownCapture={beginBodySelection} onKeyDown={keyboard} onInput={handleInput} onDragOver={e=>e.preventDefault()} onDrop={e=>e.preventDefault()}
     onCompositionStart={()=>{composing.current=true;compositionRange.current=readSelection()??props.selection;}}
     onCompositionEnd={e=>{composing.current=false;const range=compositionRange.current??props.selection;compositionFinal.current=e.data;insert(e.data,range);compositionRange.current=null;}}
     onPaste={e=>{e.preventDefault();insert(e.clipboardData.getData('text/plain'));}}

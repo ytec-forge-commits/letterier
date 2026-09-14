@@ -2,11 +2,11 @@
 
 A local Windows application for writing letters directly on stationery, arranging images and signatures, and exporting PDF or printing. [日本語](README.md)
 
-Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface switches between Japanese and English. Japanese horizontal and vertical writing and English horizontal writing are supported. Letters and images stay on the PC during normal use. Current version: 1.0.3.
+Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface switches between Japanese and English. Japanese horizontal and vertical writing and English horizontal writing are supported. Letters and images stay on the PC during normal use. Current version: 1.0.4.
 
 ## Use
 
-Choose stationery with **Choose stationery**, click the paper and type. Twenty designs keep their decoration outside the fixed writing area. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Choose a default font before writing, format a selection, or apply the default to one page or the whole letter. Add an image with **Photo / Image** or a **Text box**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring.
+Choose stationery with **Choose stationery**, click the paper and type. Twenty designs keep their decoration outside the fixed writing area. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Choose a default font before writing, format a selection, or apply the default to one page or the whole letter. Add an image with **Photo / Image** or a **Text box**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring. Each text box can use horizontal or vertical writing independently.
 
 Use **File → Save as…** to save a `.binsen` document. Recovery data is saved locally while editing. **PDF / Print** previews and exports PDF or prints through Windows, with actual size, fit and cancel choices for printable-area warnings. The 21 color-only interface themes and larger control text do not change printed stationery.
 

@@ -6,7 +6,7 @@ export interface Ruling { enabled: boolean; spacingMm: number; widthMm: number; 
 export interface Background { color: string; assetId?: string; opacity: number; fit: 'cover' | 'contain' | 'stretch'; x: number; y: number; scale: number }
 export interface PageVisual { id: string; ruling: Ruling; background: Background; design: string }
 export interface FloatingObject {
-  id: string; kind: 'image' | 'text'; assetId?: string; text?: string; style?: TextStyle;
+  id: string; kind: 'image' | 'text'; assetId?: string; text?: string; style?: TextStyle; writingMode?: WritingMode;
   anchorMode: 'flow' | 'page'; anchorOffset: number; pageIndex: number;
   x: number; y: number; width: number; height: number; rotation: number; opacity: number;
   wrap: boolean; paddingMm: number; hideRuling: boolean; z: number;

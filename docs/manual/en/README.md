@@ -1,6 +1,6 @@
 # Letterier User Manual
 
-For version 1.0.3 / Windows 10 and 11, 64-bit
+For version 1.0.4 / Windows 10 and 11, 64-bit
 
 Letterier lets you write directly on stationery, add photos or text boxes, and finish your letter as a PDF or a printed page. Letters and images stay on your computer, and ordinary use does not require an internet connection.
 
@@ -56,6 +56,12 @@ Use **Duplicate, move, or delete…** to preview a page operation before applyin
 3. Use the selected-item controls to adjust size, rotation, opacity, stacking, anchoring, and text wrapping.
 
 To move an image to another page, keep holding it near the top or bottom edge. The document scrolls automatically and keeps the dragged image visible. After dropping it, check that the full image is inside the destination page.
+
+## Text boxes
+
+Select **Text box** to place text that moves independently from the letter body. Select the box, then choose **Horizontal** or **Vertical** under **Text box writing direction**. This setting is independent of the body writing direction, so a vertical note can be placed on a horizontal letter. Selecting body text continues normally even when the pointer crosses a text box.
+
+![A horizontal text box positioned independently from the letter body](../images/en-text-box.png)
 
 ## Save and recover work
 

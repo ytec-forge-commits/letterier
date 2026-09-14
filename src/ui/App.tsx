@@ -57,7 +57,7 @@ export function App() {
       if(project.objects.length>=200)throw new Error('自由配置の要素は200個までです。');
       const image=file?await readImage(file,frames.choose):null;if(file&&!image)return;const id=uid(),line=flowAnchor(project,{id,anchorOffset:selection.start},measureText);
       const width=Math.min(kind==='image'?60:70,layout.width-30),height=image?Math.min(150,width*image.height/image.width):28;
-      const object:FloatingObject={id,kind,...(image?{assetId:image.asset.id}:{text:'ここに署名や宛名を入力',style:{...project.baseStyle}}),anchorMode:'flow',anchorOffset:selection.start,pageIndex:line.pageIndex,x:Math.max(15,(layout.width-width)/2)-line.x,y:Math.max(20,line.y)-line.y,width,height,rotation:0,opacity:1,wrap:true,paddingMm:3,hideRuling:kind==='image',z:kind==='image'?10:30};
+      const object:FloatingObject={id,kind,...(image?{assetId:image.asset.id}:{text:'ここに署名や宛名を入力',style:{...project.baseStyle},writingMode:project.settings.writingMode}),anchorMode:'flow',anchorOffset:selection.start,pageIndex:line.pageIndex,x:Math.max(15,(layout.width-width)/2)-line.x,y:Math.max(20,line.y)-line.y,width,height,rotation:0,opacity:1,wrap:true,paddingMm:3,hideRuling:kind==='image',z:kind==='image'?10:30};
       if(change({...project,objects:[...project.objects,object],assets:image?{...project.assets,[image.asset.id]:image.asset}:project.assets},false)){setSelectedObject(object.id);setPage(line.pageIndex);}
     }catch(e){setError(String(e));}finally{setImageBusy(false);}
   };

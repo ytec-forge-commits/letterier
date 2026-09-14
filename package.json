@@ -2,7 +2,7 @@
   "name": "binsen-kobo",
   "description": "レタリエ — 手紙・便箋作成アプリ",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",

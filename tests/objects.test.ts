@@ -42,3 +42,9 @@ test('画像ドラッグが表示領域の上下端へ近づくほど自動ス�
 test('ページ外へドラッグ中も画像プレビューをポインター位置に保つ',()=>{
   expect(dragGhostRect(320,740,{x:12,y:8},2,60,40)).toEqual({left:296,top:724,width:120,height:80});
 });
+test('文字箱ごとの書字方向を保存して読み戻す',()=>{
+  const p=newProject();
+  p.objects=[{id:'vertical-note',kind:'text',text:'縦書きの追伸',style:{...p.baseStyle},writingMode:'vertical',anchorMode:'page',anchorOffset:0,pageIndex:0,x:30,y:40,width:30,height:70,rotation:0,opacity:1,wrap:false,paddingMm:0,hideRuling:false,z:30} as FloatingObject];
+  const loaded=unpackProject(packProject(p));
+  expect((loaded.objects[0] as FloatingObject&{writingMode?:'horizontal'|'vertical'}).writingMode).toBe('vertical');
+});

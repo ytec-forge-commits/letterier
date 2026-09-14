@@ -4,29 +4,32 @@ import type { FloatingObject,Project } from '../core/model';
 import type { Layout,PlacedObject } from '../core/compose';
 import {autoScrollDelta,dragGhostRect,dropObjectOnPage,nearestPageIndex,type PageRect} from '../core/object-drag';
 import { textCss } from './typography';
+const pageRect=(rect:DOMRect):PageRect=>({left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom,width:rect.width,height:rect.height});
 export function ObjectArtwork({object,project}:{object:PlacedObject;project:Project}){
-  return object.kind==='image'?<img alt="" draggable={false} src={project.assets[object.assetId!]?.data} style={{width:'100%',height:'100%',objectFit:'fill'}}/>:<div className="floating-text" style={{...textCss(object.style??project.baseStyle),writingMode:project.settings.writingMode==='vertical'?'vertical-rl':'horizontal-tb'}}>{object.text}</div>;
+  const writingMode=object.writingMode??project.settings.writingMode;
+  return object.kind==='image'?<img alt="" draggable={false} src={project.assets[object.assetId!]?.data} style={{width:'100%',height:'100%',objectFit:'fill'}}/>:<div className="floating-text" style={{...textCss(object.style??project.baseStyle),writingMode:writingMode==='vertical'?'vertical-rl':'horizontal-tb'}}>{object.text}</div>;
 }
 export function objectCss(object:PlacedObject):CSSProperties{return {position:'absolute',left:`${object.actualX}mm`,top:`${object.actualY}mm`,width:`${object.width}mm`,height:`${object.height}mm`,transform:`rotate(${object.rotation}deg)`,opacity:object.opacity,zIndex:object.z,overflow:'hidden'};}
 interface Props {project:Project;layout:Layout;page:number;zoom:number;selected:string|null;onSelect:(id:string)=>void;onPreview:(id:string,patch:Partial<FloatingObject>|null)=>void;onChange:(id:string,patch:Partial<FloatingObject>)=>void;onDelete:(id:string)=>void}
 export function ObjectLayer(props:Props){
   const [ghost,setGhost]=useState<{object:PlacedObject;rect:{left:number;top:number;width:number;height:number}}|null>(null);
-  const drag=useRef<{object:PlacedObject;startX:number;startY:number;lastX:number;lastY:number;action:'move'|'resize'|'rotate';patch:Partial<FloatingObject>;centerX:number;centerY:number;grab:{x:number;y:number};unit:number;scroll:HTMLElement;raf:number;dirty:boolean}|null>(null);
-  const pageRects=()=>Array.from(drag.current?.scroll.querySelectorAll<HTMLElement>('.paper')??[]).map(element=>element.getBoundingClientRect() as PageRect);
+  const ghostElement=useRef<HTMLDivElement>(null);
+  const drag=useRef<{object:PlacedObject;startX:number;startY:number;lastX:number;lastY:number;action:'move'|'resize'|'rotate';patch:Partial<FloatingObject>;centerX:number;centerY:number;grab:{x:number;y:number};unit:number;scroll:HTMLElement;scrollTop:number;pages:PageRect[];viewport:{top:number;bottom:number};raf:number;dirty:boolean}|null>(null);
   const updateMove=(clientX:number,clientY:number,preview=true)=>{
     const d=drag.current;if(!d)return;
-    const pages=pageRects(),target=nearestPageIndex(clientX,clientY,pages);if(target<0)return;
+    const scrollDelta=d.scroll.scrollTop-d.scrollTop,pages=d.pages.map(page=>({...page,top:page.top-scrollDelta,bottom:page.bottom-scrollDelta}));
+    const target=nearestPageIndex(clientX,clientY,pages);if(target<0)return;
     const position=dropObjectOnPage(clientX,clientY,d.grab,pages[target],props.layout.width,props.layout.height,d.object.width,d.object.height);
     const patch:Partial<FloatingObject>=target===d.object.actualPage
       ? d.object.anchorMode==='flow'?{x:position.x-(d.object.actualX-d.object.x),y:position.y-(d.object.actualY-d.object.y)}:position
       : {anchorMode:'page',pageIndex:target,...position};
     d.patch=patch;
-    if(preview)setGhost({object:d.object,rect:dragGhostRect(clientX,clientY,d.grab,d.unit,d.object.width,d.object.height)});
+    if(preview&&ghostElement.current){const rect=dragGhostRect(clientX,clientY,d.grab,d.unit,d.object.width,d.object.height);ghostElement.current.style.left=`${rect.left}px`;ghostElement.current.style.top=`${rect.top}px`;}
   };
   const tick=()=>{
     const d=drag.current;if(!d)return;
     if(d.action==='move'){
-      const viewport=d.scroll.getBoundingClientRect(),delta=autoScrollDelta(d.lastY,viewport.top,viewport.bottom);
+      const delta=autoScrollDelta(d.lastY,d.viewport.top,d.viewport.bottom);
       if(delta)d.scroll.scrollTop+=delta;
       if(delta||d.dirty)updateMove(d.lastX,d.lastY);
       d.dirty=false;
@@ -35,8 +38,9 @@ export function ObjectLayer(props:Props){
   };
   const start=(e:PointerEvent<HTMLElement>,object:PlacedObject,action:'move'|'resize'|'rotate')=>{
     e.preventDefault();e.stopPropagation();props.onSelect(object.id);e.currentTarget.focus();e.currentTarget.setPointerCapture(e.pointerId);
-    const paper=e.currentTarget.closest('.paper')!.getBoundingClientRect(),unit=paper.width/props.layout.width,scroll=e.currentTarget.closest('.paper-scroll') as HTMLElement;
-    drag.current={object,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,action,patch:{},centerX:paper.left+(object.actualX+object.width/2)*unit,centerY:paper.top+(object.actualY+object.height/2)*unit,grab:{x:(e.clientX-paper.left)/unit-object.actualX,y:(e.clientY-paper.top)/unit-object.actualY},unit,scroll,raf:0,dirty:true};
+    const paper=e.currentTarget.closest('.paper')!.getBoundingClientRect(),unit=paper.width/props.layout.width,scroll=e.currentTarget.closest('.paper-scroll') as HTMLElement,viewport=scroll.getBoundingClientRect();
+    const pages=Array.from(scroll.querySelectorAll<HTMLElement>('.paper')).map(element=>pageRect(element.getBoundingClientRect()));
+    drag.current={object,startX:e.clientX,startY:e.clientY,lastX:e.clientX,lastY:e.clientY,action,patch:{},centerX:paper.left+(object.actualX+object.width/2)*unit,centerY:paper.top+(object.actualY+object.height/2)*unit,grab:{x:(e.clientX-paper.left)/unit-object.actualX,y:(e.clientY-paper.top)/unit-object.actualY},unit,scroll,scrollTop:scroll.scrollTop,pages,viewport:{top:viewport.top,bottom:viewport.bottom},raf:0,dirty:true};
     if(action==='move')setGhost({object,rect:dragGhostRect(e.clientX,e.clientY,drag.current.grab,unit,object.width,object.height)});
     drag.current.raf=requestAnimationFrame(tick);
   };
@@ -60,5 +64,5 @@ export function ObjectLayer(props:Props){
   return <>{props.layout.objects.filter(o=>o.actualPage===props.page).map(o=><div key={o.id} className="object-art" style={objectCss(o)}><ObjectArtwork object={o} project={props.project}/></div>)}{props.layout.objects.filter(o=>o.actualPage===props.page).sort((a,b)=>a.z-b.z).map(o=><div key={o.id} className={`object-controls ${props.selected===o.id?'selected':''}`} style={{...objectCss(o),opacity:1,zIndex:100+o.z,overflow:'visible'}} data-object-control="" onPointerMove={move} onPointerUp={end} onPointerCancel={cancel} onKeyDown={e=>{
     if(e.ctrlKey&&['s','o','z','y'].includes(e.key.toLowerCase()))return;e.stopPropagation();if(e.key==='Escape'){cancel();return;}if(['Backspace','Delete'].includes(e.key)){e.preventDefault();props.onDelete(o.id);}const step=e.shiftKey?5:1;
     if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();props.onChange(o.id,{x:o.x+(e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0),y:o.y+(e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0)});}
-  }}><button className="object-hit" aria-label={`${o.kind==='image'?'画像':'文字箱'}を選択 ${o.kind==='image'?props.project.assets[o.assetId!]?.name:o.text?.slice(0,30)}`} aria-pressed={props.selected===o.id} onPointerDown={e=>start(e,o,'move')} onClick={()=>props.onSelect(o.id)} />{props.selected===o.id&&<><button className="object-handle resize" aria-label="ドラッグして大きさを変更" title="ドラッグで拡大・縮小。画像はShiftで比率を解除" onPointerDown={e=>start(e,o,'resize')}/><button className="object-handle rotate" aria-label="ドラッグして回転" title="ドラッグで回転" onPointerDown={e=>start(e,o,'rotate')}>↻</button></>}</div>)}{ghost&&createPortal(<div className="object-drag-ghost" style={{left:ghost.rect.left,top:ghost.rect.top,width:ghost.rect.width,height:ghost.rect.height,transform:`rotate(${ghost.object.rotation}deg)`,opacity:ghost.object.opacity}}><ObjectArtwork object={ghost.object} project={props.project}/></div>,document.body)}</>;
+  }}><button className="object-hit" aria-label={`${o.kind==='image'?'画像':'文字箱'}を選択 ${o.kind==='image'?props.project.assets[o.assetId!]?.name:o.text?.slice(0,30)}`} aria-pressed={props.selected===o.id} onPointerDown={e=>start(e,o,'move')} onClick={()=>props.onSelect(o.id)} />{props.selected===o.id&&<><button className="object-handle resize" aria-label="ドラッグして大きさを変更" title="ドラッグで拡大・縮小。画像はShiftで比率を解除" onPointerDown={e=>start(e,o,'resize')}/><button className="object-handle rotate" aria-label="ドラッグして回転" title="ドラッグで回転" onPointerDown={e=>start(e,o,'rotate')}>↻</button></>}</div>)}{ghost&&createPortal(<div ref={ghostElement} className="object-drag-ghost" style={{left:ghost.rect.left,top:ghost.rect.top,width:ghost.rect.width,height:ghost.rect.height,transform:`rotate(${ghost.object.rotation}deg)`,opacity:ghost.object.opacity}}><ObjectArtwork object={ghost.object} project={props.project}/></div>,document.body)}</>;
 }

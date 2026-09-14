@@ -25,7 +25,7 @@ test('描き直した便箋素材は更新後のURLを使い古いキャッシ�
     expect(generatedCompanionArt[id]).toBe(`${id}-companion`);
     expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}.png`,import.meta.url)))).toBe(6);
     expect(pngColorType(fileURLToPath(new URL(`../public/template-motifs/${id}-companion.png`,import.meta.url)))).toBe(6);
-    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=1.0.3`);
+    expect(templateArtPath(id,generatedArt[id])).toBe(`/template-motifs/${id}.png?v=1.0.4`);
   }
 });
 test('和洋各10種・季節ごと各2種、別管理の外観21テーマを備える',()=>{

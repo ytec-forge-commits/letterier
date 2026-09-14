@@ -34,7 +34,7 @@ function visual(v:unknown):PageVisual {
 function floating(v:unknown,textLength:number):FloatingObject {
   const o=obj(v);
   const kind=choice(o.kind,['image','text']);
-  return {id:key(o.id),kind,...(kind==='image'?{assetId:key(o.assetId)}:{text:string(o.text,10000),style:style(o.style) as TextStyle}),anchorMode:choice(o.anchorMode,['flow','page']),anchorOffset:integer(o.anchorOffset,0,textLength),pageIndex:integer(o.pageIndex,0,999),x:num(o.x,-1000,1000),y:num(o.y,-1000,1000),width:num(o.width,1,600),height:num(o.height,1,600),rotation:num(o.rotation,-360,360),opacity:num(o.opacity,0,1),wrap:bool(o.wrap),paddingMm:num(o.paddingMm,0,50),hideRuling:bool(o.hideRuling),z:num(o.z,-1000,1000)};
+  return {id:key(o.id),kind,...(kind==='image'?{assetId:key(o.assetId)}:{text:string(o.text,10000),style:style(o.style) as TextStyle,...(o.writingMode===undefined?{}:{writingMode:choice(o.writingMode,['horizontal','vertical'] as const)})}),anchorMode:choice(o.anchorMode,['flow','page']),anchorOffset:integer(o.anchorOffset,0,textLength),pageIndex:integer(o.pageIndex,0,999),x:num(o.x,-1000,1000),y:num(o.y,-1000,1000),width:num(o.width,1,600),height:num(o.height,1,600),rotation:num(o.rotation,-360,360),opacity:num(o.opacity,0,1),wrap:bool(o.wrap),paddingMm:num(o.paddingMm,0,50),hideRuling:bool(o.hideRuling),z:num(o.z,-1000,1000)};
 }
 
 export function validateProject(value: unknown): Project {
