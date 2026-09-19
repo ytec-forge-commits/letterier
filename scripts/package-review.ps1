@@ -11,6 +11,7 @@ New-Item -ItemType Directory -Path $stage | Out-Null
 Copy-Item -LiteralPath $binary -Destination $stage
 Copy-Item -LiteralPath (Join-Path $projectRoot 'public/legal') -Destination (Join-Path $stage 'legal') -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot 'docs/manual') -Destination (Join-Path $stage 'manual') -Recurse
+Copy-Item -LiteralPath (Join-Path $projectRoot 'distribution/README-VECTOR.txt') -Destination $stage
 foreach ($name in @('README.md','README.en.md','LICENSE','NOTICE','THIRD_PARTY_NOTICES.md','ASSETS_LICENSE.md','BRAND_POLICY.md','LICENSE_EXCEPTIONS.md','PRIVACY.md','IMAGE-FORMATS.md')) {
  Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
 }

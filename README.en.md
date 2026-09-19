@@ -6,6 +6,8 @@ Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface swi
 
 The current version is **1.0.4**. See the [English user manual](docs/manual/en/README.md) for illustrated instructions.
 
+Letterier is freeware; its original source code is licensed under Apache License 2.0. It supports 64-bit Windows 10 and 11 and uses Microsoft WebView2 Runtime. See the [distribution information](distribution/README-VECTOR.txt) for installation, removal, third-party works, and author contact details. Support is available through [Y-TEC Forge contact](https://ytec.cloudfree.jp/forge/en/contact/).
+
 ## Use
 
 Choose stationery with **Choose stationery**, click the paper and type. Twenty designs include first and continuation pages; decorations stay outside the fixed body area and never reduce writing space. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Choose **Default font** before writing, format a selection, or apply the default to one page or the whole body. Add an image with **Photo / Image** or a **Text box**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring. Each text box can use horizontal or vertical writing independently. Holding an object near the top or bottom edge while dragging auto-scrolls the document and lets it move to another page.

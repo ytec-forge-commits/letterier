@@ -52,11 +52,13 @@ def build(language: str):
     story = []
     paragraph = []
     page_break_before = {
+        "最初の手紙を作る",
         "画面の見方",
         "縦書きで書く",
         "ページを扱う",
         "写真・画像を入れる",
         "保存と回復",
+        "Create your first letter",
         "Screen overview",
         "Write in English",
         "Pages",

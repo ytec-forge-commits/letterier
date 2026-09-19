@@ -6,6 +6,8 @@
 
 現在のバージョンは **1.0.4** です。詳しい手順は[日本語操作マニュアル](docs/manual/ja/README.md)をご覧ください。
 
+本ソフトは無料で利用できるフリーソフトで、本体コードはApache License 2.0です。Windows 10・11（64ビット）へ対応し、Microsoft WebView2 Runtimeを使用します。導入・削除方法、第三者著作物、作者への連絡先をまとめた[利用者向け説明書](distribution/README-VECTOR.txt)もご覧ください。お問い合わせは[Y-TEC Forge お問い合わせ](https://ytec.cloudfree.jp/forge/contact/)へお願いします。
+
 ## はじめ方
 
 1. 「便箋を選ぶ」から和風10種・洋風10種を選びます。装飾は本文外周に収まり、どの便箋でも本文領域の広さは変わりません。

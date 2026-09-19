@@ -4,6 +4,22 @@ For version 1.0.4 / Windows 10 and 11, 64-bit
 
 Letterier lets you write directly on stationery, add photos or text boxes, and finish your letter as a PDF or a printed page. Letters and images stay on your computer, and ordinary use does not require an internet connection.
 
+## Distribution, system requirements, and contact
+
+- Author: Y-TEC
+- Distribution: Freeware. There are no paid features, trial limits, or payments.
+- Software license: Apache License 2.0
+- System requirements: 64-bit Windows 10 or 11 and Microsoft WebView2 Runtime
+- Contact the author: [Y-TEC Forge contact](https://ytec.cloudfree.jp/forge/en/contact/)
+- Product page: [Letterier on Y-TEC Forge](https://ytec.cloudfree.jp/forge/en/projects/letterier/)
+- Source code: [GitHub](https://github.com/ytec-forge-commits/letterier)
+
+For the portable ZIP edition, extract the ZIP before launching `Letterier.exe` from the extracted folder. Windows may show a warning because this edition uses a self-signed certificate. For the standard installer, run `Letterier-1.0.4-windows-x64-self-signed-setup.exe` and follow the prompts. For the Microsoft Store edition, select **Install** in Microsoft Store. The portable ZIP does not include WebView2 Runtime; install the official Microsoft Runtime if it is not already present.
+
+To uninstall the portable ZIP edition, close Letterier and delete its extracted folder. To uninstall the standard installer or Microsoft Store edition, open **Windows Settings → Apps → Installed apps**, open the menu for **Letterier**, and select **Uninstall**. Your `.binsen`, `.binsenbak`, PDF, and image files are not deleted automatically. Check them first and delete only files you no longer need.
+
+Authors, licenses, and usage terms for bundled third-party components, fonts, and image resources are documented in `THIRD_PARTY_NOTICES.md`, `ASSETS_LICENSE.md`, and the `legal` folder included with the distribution. These resources are used and distributed under their stated terms.
+
 ## Create your first letter
 
 1. Select **Choose stationery** at the top.

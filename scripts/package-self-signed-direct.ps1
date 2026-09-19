@@ -40,6 +40,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $projectRoot 'public\legal') -Destination (Join-Path $stage 'legal') -Recurse
     Copy-Item -LiteralPath (Join-Path $projectRoot ("output\pdf\Letterier-Manual-ja-$version.pdf")) -Destination $stage
     Copy-Item -LiteralPath (Join-Path $projectRoot ("output\pdf\Letterier-Manual-en-$version.pdf")) -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $projectRoot 'distribution\README-VECTOR.txt') -Destination $stage
     foreach ($name in @('README.md','README.en.md','LICENSE','NOTICE','THIRD_PARTY_NOTICES.md','ASSETS_LICENSE.md','BRAND_POLICY.md','LICENSE_EXCEPTIONS.md','PRIVACY.md','IMAGE-FORMATS.md','CODE_SIGNING_POLICY.md','CHANGELOG.md')) {
         Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
     }
@@ -49,6 +50,7 @@ Letterier $version - Windows x64 direct distribution
 Letterier.exe is Authenticode-signed with a Y-TEC self-signed certificate and an RFC 3161 timestamp.
 The certificate is not installed into Windows trust stores. Windows or SmartScreen may still show a warning.
 Letters and images remain on this PC during ordinary use. Microsoft WebView2 Runtime is required.
+Read README-VECTOR.txt first for system requirements, installation, removal, license, and author contact details.
 "@
     [System.IO.File]::WriteAllText((Join-Path $stage 'DIRECT-DISTRIBUTION.txt'), $notice, [System.Text.UTF8Encoding]::new($false))
 

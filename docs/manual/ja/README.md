@@ -4,6 +4,22 @@
 
 レタリエは、便箋を選び、紙の上へ直接文章を書き、写真や文字を添えて印刷できる手紙作成アプリです。手紙と画像はお使いのパソコン内で扱われ、通常の利用にインターネット接続は必要ありません。
 
+## 配布情報・動作環境・作者への連絡先
+
+- 作者: Y-TEC
+- 取り扱い種別: フリーソフト（無料）。有料機能、試用期限、送金はありません。
+- ソフトウェアライセンス: Apache License 2.0
+- 動作環境: Windows 10・11（64ビット）、Microsoft WebView2 Runtime
+- 作者への連絡先: [Y-TEC Forge お問い合わせ](https://ytec.cloudfree.jp/forge/contact/)
+- 公式紹介ページ: [Y-TEC Forge レタリエ](https://ytec.cloudfree.jp/forge/projects/letterier/)
+- ソースコード: [GitHub](https://github.com/ytec-forge-commits/letterier)
+
+ポータブルZIP版はZIPを展開してから、フォルダー内の `Letterier.exe` を起動します。自己署名版のため、初回にWindowsの警告が表示されることがあります。通常インストーラー版は `Letterier-1.0.4-windows-x64-self-signed-setup.exe` を実行し、画面の案内に従います。Microsoft Store版はStoreの「インストール」を選びます。ポータブルZIP版にWebView2 Runtimeは同梱していません。未導入の場合はMicrosoft公式のRuntimeを導入してください。
+
+アンインストールは、ポータブルZIP版ではレタリエを終了して展開先フォルダーを削除します。通常インストーラー版とMicrosoft Store版では、Windowsの「設定 → アプリ → インストールされているアプリ」で「レタリエ」のメニューを開き、「アンインストール」を選びます。利用者が保存した `.binsen`、`.binsenbak`、PDF、画像は自動では削除されません。必要なファイルを確認してから、不要なものだけを利用者自身で削除してください。
+
+同梱する第三者コンポーネント、フォント、画像資源の著作者・ライセンス・利用条件は、配布物内の `THIRD_PARTY_NOTICES.md`、`ASSETS_LICENSE.md`、`legal` フォルダーに記載しています。各条件に従って利用・同梱しています。
+
 ## 最初の手紙を作る
 
 1. 画面上部の「便箋を選ぶ」を押します。
