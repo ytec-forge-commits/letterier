@@ -1,0 +1,5 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default", "description": "ローカル便箋編集の基本ウィンドウ操作",
+  "windows": ["main"], "permissions": ["core:default"]
+}

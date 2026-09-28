@@ -1,0 +1,1 @@
+async(page)=>{await page.getByRole('button',{name:'PDF・印刷',exact:true}).click();await page.getByRole('dialog',{name:'PDF・印刷の確認'}).waitFor();await page.pdf({path:'output/playwright/image-formats-a.pdf',printBackground:true,preferCSSPageSize:true});await page.getByRole('dialog',{name:'PDF・印刷の確認'}).getByRole('button',{name:'閉じる',exact:true}).click();}

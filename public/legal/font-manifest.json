@@ -1,0 +1,368 @@
+{
+  "repository": "https://github.com/google/fonts",
+  "commit": "5e35378e6bda803962ee6fd257e444a7d459660d",
+  "retrieved": "2026-09-06",
+  "fonts": [
+    {
+      "name": "Klee One",
+      "slug": "kleeone",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/kleeone",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Klee Project Authors (https://github.com/fontworks-fonts/Klee)\r\n\r\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\r\nThis license is copied below, and is also available with a FAQ at:\r\nhttps://scripts.sil.org/OFL\r\n\r\n\r\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "KleeOne-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "bf4063f030cc2ae6adf0a11424a1888e5c0eb4438f1f6d02f52294af868e9b3a",
+          "bytes": 8724204
+        },
+        {
+          "file": "KleeOne-SemiBold.ttf",
+          "weight": 600,
+          "variable": false,
+          "sha256": "b031ec426c23ca1143ef1f7d58bee7a79efe119ed654152f121c922202b303fd",
+          "bytes": 8905128
+        }
+      ]
+    },
+    {
+      "name": "Yomogi",
+      "slug": "yomogi",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/yomogi",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Yomogi Project Authors (https://github.com/satsuyako/YomogiFont), all rights reserved.\n\nThis Font Software is licensed under the SIL Open Font License,\nVersion 1.1.\n\nThis license is copied below, and is also available with a FAQ at:\nhttps://openfontlicense.org\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "Yomogi-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "ec280f473a03187292905618f24fdb08a6dcbf8620b52637e3b589fe745259b9",
+          "bytes": 4045904
+        }
+      ]
+    },
+    {
+      "name": "Yuji Syuku",
+      "slug": "yujisyuku",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/yujisyuku",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2021 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "YujiSyuku-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "82728ebafc8c97391e2dab633414a806f344b8e4e2227d307179f07b548fca61",
+          "bytes": 8430348
+        }
+      ]
+    },
+    {
+      "name": "Yuji Mai",
+      "slug": "yujimai",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/yujimai",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2021 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "YujiMai-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "05d83b65204a5de6fc34c222057fc082f8c6e2e44c05a0d28f4189b3e54c54c2",
+          "bytes": 8496292
+        }
+      ]
+    },
+    {
+      "name": "Yuji Boku",
+      "slug": "yujiboku",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/yujiboku",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2021 The Yuji Project Authors (https://github.com/Kinutafontfactory/Yuji)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "YujiBoku-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "94fda16384f3bdac24376a000c57e99abfa314961bd89ef27badfb7410322003",
+          "bytes": 8525588
+        }
+      ]
+    },
+    {
+      "name": "Zen Kurenaido",
+      "slug": "zenkurenaido",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/zenkurenaido",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2021 The Zen Kurenaido Project Authors (https://github.com/googlefonts/zen-kurenaido)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "ZenKurenaido-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "58b8d930d9fc10c8a5810c085bae378dacb98d0779073ee6d53d919f19ee6a4f",
+          "bytes": 4303112
+        }
+      ]
+    },
+    {
+      "name": "Yusei Magic",
+      "slug": "yuseimagic",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/yuseimagic",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Yusei Magic Project Authors (https://github.com/tanukifont/YuseiMagic)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "YuseiMagic-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "82098615f39ed9da6a8ccc674b9006e49c70dd5b775a7a1697f6bedd22ce25a2",
+          "bytes": 3134968
+        }
+      ]
+    },
+    {
+      "name": "Mochiy Pop One",
+      "slug": "mochiypopone",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/mochiypopone",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Mochiypop Project Authors (https://github.com/fontdasu/Mochiypop)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "MochiyPopOne-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "9e009430e1316c271a5f34759c6b65fc343c4e806f193042528887e7235a92c6",
+          "bytes": 5163948
+        }
+      ]
+    },
+    {
+      "name": "Hachi Maru Pop",
+      "slug": "hachimarupop",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/hachimarupop",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Hachi Maru Pop Project Authors (https://github.com/noriokanisawa/HachiMaruPop)\n\r\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\r\nThis license is copied below, and is also available with a FAQ at:\r\nhttps://scripts.sil.org/OFL\r\n\r\n\r\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "HachiMaruPop-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "78408910c8f1a2f174a279cbc1484b48b71780039eba3fe1be2bfcc5d4df3f98",
+          "bytes": 4385624
+        }
+      ]
+    },
+    {
+      "name": "Potta One",
+      "slug": "pottaone",
+      "language": "日本語",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/pottaone",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Potta Project Authors (https://github.com/go108go/Potta)\r\n\r\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\r\nThis license is copied below, and is also available with a FAQ at:\r\nhttp://scripts.sil.org/OFL\r\n\r\n\r\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "PottaOne-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "bde843868b56e429e1c863da2efa76df533162b226d990efcb96d533b0ca2a93",
+          "bytes": 4918516
+        }
+      ]
+    },
+    {
+      "name": "Caveat",
+      "slug": "caveat",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/caveat",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2014 The Caveat Project Authors (https://github.com/googlefonts/caveat)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "Caveat[wght].ttf",
+          "weight": 400,
+          "variable": true,
+          "sha256": "0bdb6b660482d31531b3945849fba5916b3ef8695da7024a9e6b9ee3c4157988",
+          "bytes": 403648
+        }
+      ]
+    },
+    {
+      "name": "Dancing Script",
+      "slug": "dancingscript",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/dancingscript",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2016 The Dancing Script Project Authors (https://github.com/googlefonts/DancingScript), with Reserved Font Name 'Dancing Script'.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "DancingScript[wght].ttf",
+          "weight": 400,
+          "variable": true,
+          "sha256": "21808625578fe8d8cd10cb684be546dca077b27cd03a53a2f1ec11dc743c924c",
+          "bytes": 133636
+        }
+      ]
+    },
+    {
+      "name": "Patrick Hand",
+      "slug": "patrickhand",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/patrickhand",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2010-2012 Patrick Wagesreiter (mail@patrickwagesreiter.at)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "PatrickHand-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "0f173b3e6cb6d1af25babf7f0057c5ac4ee11f9992b0469bb817e967ef4ad0fc",
+          "bytes": 214772
+        }
+      ]
+    },
+    {
+      "name": "Kalam",
+      "slug": "kalam",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/kalam",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2014, Indian Type Foundry (info@indiantypefoundry.com).\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "Kalam-Light.ttf",
+          "weight": 300,
+          "variable": false,
+          "sha256": "2b8f2c0208d397a1823688783da3317d6af18ea007a9a1b56ddb17e27820507e",
+          "bytes": 437512
+        },
+        {
+          "file": "Kalam-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "57cecb63d4608019371954274ae1d8c397764debd5b19d4a33c1efa4dc923c0b",
+          "bytes": 427360
+        },
+        {
+          "file": "Kalam-Bold.ttf",
+          "weight": 700,
+          "variable": false,
+          "sha256": "2f6576601db015d4f6c08678120277fc8510b98c06e932ce7a6a9cbff4cbdded",
+          "bytes": 460896
+        }
+      ]
+    },
+    {
+      "name": "Indie Flower",
+      "slug": "indieflower",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/indieflower",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2010 The Indie Flower Authors (kimberlygeswein.com),\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "IndieFlower-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "ccc94b22b156e9c5dfe50fd051f01b097600b252c24473e624bb43a143140a94",
+          "bytes": 108196
+        }
+      ]
+    },
+    {
+      "name": "Shadows Into Light",
+      "slug": "shadowsintolight",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/shadowsintolight",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2010, Kimberly Geswein (kimberlygeswein.com)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "ShadowsIntoLight.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "1347863151acdc00fa281daaba1a3543dbce5870b55f9cf7479a15bb84007681",
+          "bytes": 54304
+        }
+      ]
+    },
+    {
+      "name": "Architects Daughter",
+      "slug": "architectsdaughter",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/architectsdaughter",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2010, Kimberly Geswein (kimberlygeswein.com)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "ArchitectsDaughter-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "6159718a08898e34bc1cb7354086141a5f9a70b73e54dbec27ead0d59a697359",
+          "bytes": 43352
+        }
+      ]
+    },
+    {
+      "name": "Nothing You Could Do",
+      "slug": "nothingyoucoulddo",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/nothingyoucoulddo",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2010, Kimberly Geswein (kimberlygeswein.com)\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "NothingYouCouldDo.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "1daf8cf79076bf59c5a9117b5efd6ecea35e57a05ef127fe4f95b072b8a5245d",
+          "bytes": 34920
+        }
+      ]
+    },
+    {
+      "name": "Reenie Beanie",
+      "slug": "reeniebeanie",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/reeniebeanie",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2010, James Grieshaber (james@typeco.com)\r\n\r\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\r\nThis license is copied below, and is also available with a FAQ at:\r\nhttp://scripts.sil.org/OFL\r\n\r\n\r\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "ReenieBeanie.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "0ea608aa325bf9e11c9590cc0b63dcf7cd215e270784f1ebbe6fad4927b31ff8",
+          "bytes": 147036
+        }
+      ]
+    },
+    {
+      "name": "Kaushan Script",
+      "slug": "kaushanscript",
+      "language": "English",
+      "source": "https://github.com/google/fonts/tree/5e35378e6bda803962ee6fd257e444a7d459660d/ofl/kaushanscript",
+      "license": "OFL-1.1",
+      "copyright": "Copyright (c) 2011, Pablo Impallari (www.impallari.com|impallari@gmail.com),\nCopyright (c) 2011, Igino Marini. (www.ikern.com|mail@iginomarini.com),\nwith Reserved Font Name Kaushan Script.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at:\nhttp://scripts.sil.org/OFL\n\n\n-----------------------------------------------------------",
+      "files": [
+        {
+          "file": "KaushanScript-Regular.ttf",
+          "weight": 400,
+          "variable": false,
+          "sha256": "6d8d379d9bba98178bee476d68114c8f83812c18005ecccf679e70f60e03d8f6",
+          "bytes": 210672
+        }
+      ]
+    }
+  ]
+}

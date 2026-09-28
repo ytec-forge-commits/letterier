@@ -1,0 +1,12 @@
+node_modules/
+src-tauri/target/
+output/
+.local/
+.ytec-director/
+.playwright-cli/
+src-tauri/gen/
+dist/
+*.pfx
+*.p12
+.env
+.env.*
