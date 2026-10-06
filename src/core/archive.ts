@@ -20,6 +20,7 @@ function style(v:unknown,partial=false):Partial<TextStyle> {
     switch(k){
       case 'fontFamily':out[k]=string(s[k],200);break;
       case 'sizePt':out[k]=num(s[k],6,72);break;
+      case 'letterSpacingPt':out[k]=s[k]===undefined?0:num(s[k],0,12);break;
       case 'color':out[k]=color(s[k]);break;
       case 'verticalInlineMode':out[k]=choice(s[k],['auto','normal','tate-chu-yoko'] as const);break;
       default:out[k]=bool(s[k]);
@@ -29,12 +30,14 @@ function style(v:unknown,partial=false):Partial<TextStyle> {
 }
 function visual(v:unknown):PageVisual {
   const p=obj(v),r=obj(p.ruling),m=obj(r.margins),b=obj(p.background);
-  return {id:key(p.id),design:key(p.design),ruling:{enabled:bool(r.enabled),spacingMm:num(r.spacingMm,4,30),widthMm:num(r.widthMm,.05,2),color:color(r.color),margins:{top:num(m.top,0,290),right:num(m.right,0,290),bottom:num(m.bottom,0,290),left:num(m.left,0,290)}},background:{color:color(b.color),...(b.assetId?{assetId:key(b.assetId)}:{}),opacity:num(b.opacity,0,1),fit:choice(b.fit,['cover','contain','stretch']),x:num(b.x,0,100),y:num(b.y,0,100),scale:num(b.scale,.1,5)}};
+  const offsets={...(b.offsetXmm===undefined?{}:{offsetXmm:num(b.offsetXmm,-1000,1000)}),...(b.offsetYmm===undefined?{}:{offsetYmm:num(b.offsetYmm,-1000,1000)})};
+  return {id:key(p.id),design:key(p.design),ruling:{enabled:bool(r.enabled),spacingMm:num(r.spacingMm,4,30),widthMm:num(r.widthMm,.05,2),color:color(r.color),margins:{top:num(m.top,0,290),right:num(m.right,0,290),bottom:num(m.bottom,0,290),left:num(m.left,0,290)},...(r.charactersPerLine===undefined?{}:{charactersPerLine:integer(r.charactersPerLine,1,200)}),...(r.autoSpacing===undefined?{}:{autoSpacing:bool(r.autoSpacing)}),...(r.autoWidth===undefined?{}:{autoWidth:bool(r.autoWidth)})},background:{color:color(b.color),...(b.assetId?{assetId:key(b.assetId)}:{}),opacity:num(b.opacity,0,1),fit:choice(b.fit,['cover','contain','stretch']),x:num(b.x,0,100),y:num(b.y,0,100),scale:num(b.scale,.1,5),...offsets}};
 }
 function floating(v:unknown,textLength:number):FloatingObject {
   const o=obj(v);
   const kind=choice(o.kind,['image','text']);
-  return {id:key(o.id),kind,...(kind==='image'?{assetId:key(o.assetId)}:{text:string(o.text,10000),style:style(o.style) as TextStyle,...(o.writingMode===undefined?{}:{writingMode:choice(o.writingMode,['horizontal','vertical'] as const)})}),anchorMode:choice(o.anchorMode,['flow','page']),anchorOffset:integer(o.anchorOffset,0,textLength),pageIndex:integer(o.pageIndex,0,999),x:num(o.x,-1000,1000),y:num(o.y,-1000,1000),width:num(o.width,1,600),height:num(o.height,1,600),rotation:num(o.rotation,-360,360),opacity:num(o.opacity,0,1),wrap:bool(o.wrap),paddingMm:num(o.paddingMm,0,50),hideRuling:bool(o.hideRuling),z:num(o.z,-1000,1000)};
+  const stationery=o.stationery===undefined?{}:{stationery:bool(o.stationery)};
+  return {id:key(o.id),kind,...stationery,...(kind==='image'?{assetId:key(o.assetId)}:{text:string(o.text,10000),style:style(o.style) as TextStyle,...(o.writingMode===undefined?{}:{writingMode:choice(o.writingMode,['horizontal','vertical'] as const)})}),anchorMode:choice(o.anchorMode,['flow','page']),anchorOffset:integer(o.anchorOffset,0,textLength),pageIndex:integer(o.pageIndex,0,999),x:num(o.x,-1000,1000),y:num(o.y,-1000,1000),width:num(o.width,1,600),height:num(o.height,1,600),rotation:num(o.rotation,-360,360),opacity:num(o.opacity,0,1),wrap:bool(o.wrap),paddingMm:num(o.paddingMm,0,50),hideRuling:bool(o.hideRuling),z:num(o.z,-1000,1000)};
 }
 
 export function validateProject(value: unknown): Project {

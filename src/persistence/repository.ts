@@ -26,10 +26,11 @@ export class DocumentRepository {
     if(!entries.some(e=>e.hash===hash))await this.store.put(`revision-${p.id}-${hash}`,bytes);
     await this.store.put(`history-${p.id}`,encodeJson(addRevision(entries,entry)));
   });}
-  private async writeSnapshot(project:Project,label:string,time:number):Promise<Revision[]> {
+  private async writeSnapshot(project:Project,label:string,time:number,keepProtectedLabel=false):Promise<Revision[]> {
     if(label.length>100)throw new Error('保護版の名前は100文字までです。');
     const bytes=packProject(project),hash=await sha256(bytes),entries=await this.history(project.id);
-    const next:Revision={id:hash,hash,time,label,protected:!!label,preview:bodyText(project).slice(0,300)};
+    const existing=entries.find(entry=>entry.hash===hash);
+    const next:Revision={id:hash,hash,time,label:keepProtectedLabel&&existing?.protected?existing.label:label,protected:!!label,preview:bodyText(project).slice(0,300)};
     const updated=addRevision(entries,next);
     if(!entries.some(e=>e.hash===hash))await this.store.put(`revision-${project.id}-${hash}`,bytes);
     await this.store.put(`history-${project.id}`,encodeJson(updated));
@@ -45,7 +46,7 @@ export class DocumentRepository {
   restore(project:Project,revision:string):Promise<Project>{return this.serial(async()=>{
     const entry=(await this.history(project.id)).find(e=>e.id===revision);if(!entry)throw new Error('選択した保存履歴が見つかりません。');
     const restored=await this.revision(project.id,entry);
-    await this.writeSnapshot(project,'',Date.now());
+    await this.writeSnapshot(project,'復元前の状態',Date.now(),true);
     return restored;
   });}
   exportBackup(project:Project):Promise<Uint8Array>{return this.serial(async()=>{

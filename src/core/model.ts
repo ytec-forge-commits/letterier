@@ -1,15 +1,15 @@
 export type WritingMode = 'horizontal' | 'vertical';
-export interface TextStyle { fontFamily: string; sizePt: number; bold: boolean; italic: boolean; underline: boolean; color: string; verticalInlineMode: 'auto' | 'normal' | 'tate-chu-yoko' }
+export interface TextStyle { fontFamily: string; sizePt: number; bold: boolean; italic: boolean; underline: boolean; color: string; verticalInlineMode: 'auto' | 'normal' | 'tate-chu-yoko'; letterSpacingPt?: number }
 export interface TextRun { text: string; style: Partial<TextStyle> }
 export interface Margins { top: number; right: number; bottom: number; left: number }
-export interface Ruling { enabled: boolean; spacingMm: number; widthMm: number; color: string; margins: Margins }
-export interface Background { color: string; assetId?: string; opacity: number; fit: 'cover' | 'contain' | 'stretch'; x: number; y: number; scale: number }
+export interface Ruling { enabled: boolean; spacingMm: number; widthMm: number; color: string; margins: Margins; charactersPerLine?: number; autoSpacing?: boolean; autoWidth?: boolean }
+export interface Background { color: string; assetId?: string; opacity: number; fit: 'cover' | 'contain' | 'stretch'; x: number; y: number; scale: number; offsetXmm?: number; offsetYmm?: number }
 export interface PageVisual { id: string; ruling: Ruling; background: Background; design: string }
 export interface FloatingObject {
   id: string; kind: 'image' | 'text'; assetId?: string; text?: string; style?: TextStyle; writingMode?: WritingMode;
   anchorMode: 'flow' | 'page'; anchorOffset: number; pageIndex: number;
   x: number; y: number; width: number; height: number; rotation: number; opacity: number;
-  wrap: boolean; paddingMm: number; hideRuling: boolean; z: number;
+  wrap: boolean; paddingMm: number; hideRuling: boolean; z: number; stationery?:boolean;
 }
 export interface OriginalMaterial {readonly name:string;readonly format:'gif'|'webp'|'heic'|'heif'|'psd'|'ai'|'pdf';readonly index:number;readonly data:string}
 export interface Asset { readonly id: string; readonly name: string; readonly mime: string; readonly data: string;readonly original?:OriginalMaterial }
@@ -19,7 +19,7 @@ export interface Project {
   baseStyle: TextStyle; body: { runs: TextRun[] }; pages: PageVisual[]; continuation: PageVisual;
   objects: FloatingObject[]; assets: Record<string, Asset>; templateId: string;
 }
-export const defaultStyle: TextStyle = { fontFamily: '游明朝', sizePt: 14, bold: false, italic: false, underline: false, color: '#273b35', verticalInlineMode: 'auto' };
+export const defaultStyle: TextStyle = { fontFamily: '游明朝', sizePt: 14, bold: false, italic: false, underline: false, color: '#273b35', verticalInlineMode: 'auto', letterSpacingPt: 0 };
 export const uid = () => crypto.randomUUID();
 export const clone = <T,>(value: T): T => structuredClone(value);
 export function cloneProject(project:Project):Project{
@@ -30,8 +30,8 @@ export function pruneAssets(project:Project):Project{
   const used=new Set([...project.objects.map(o=>o.assetId),...project.pages.map(p=>p.background.assetId),project.continuation.background.assetId]);
   return {...project,assets:Object.fromEntries(Object.entries(project.assets).filter(([id])=>used.has(id)))};
 }
-export function newProject(): Project {
-  const visual: PageVisual = { id: uid(), ruling: { enabled: true, spacingMm: 8, widthMm: 0.15, color: '#b2c4b8', margins: {top:20,right:20,bottom:20,left:20} }, background: { color: '#fffefa', opacity: 1, fit: 'cover', x:50, y:50, scale:1 }, design:'washi' };
+export function newProject(options:{automaticRuling?:boolean}={}): Project {
+  const visual: PageVisual = { id: uid(), ruling: { enabled: true, spacingMm: 8, widthMm: 0.15, color: '#b2c4b8', margins: {top:20,right:20,bottom:20,left:20}, ...(options.automaticRuling===false?{}:{autoSpacing:true,autoWidth:true}) }, background: { color: '#fffefa', opacity: 1, fit: 'cover', x:50, y:50, scale:1 }, design:'washi' };
   return { format:'binsen', version:2, id:uid(), title:'新しい手紙', settings:{paper:'A4',orientation:'portrait',writingMode:'horizontal',orphanControl:true}, baseStyle:clone(defaultStyle), body:{runs:[{text:'',style:{}}]}, pages:[visual], continuation:{...clone(visual),id:uid()}, objects:[], assets:{}, templateId:'washi' };
 }
 export function bodyText(project: Project): string { return project.body.runs.map(r => r.text).join(''); }
@@ -88,4 +88,7 @@ export function paperSize(project: Project): { width: number; height: number } {
   const [short,long] = {A4:[210,297],B5:[182,257],POSTCARD:[100,148]}[project.settings.paper];
   return project.settings.orientation==='portrait' ? {width:short,height:long} : {width:long,height:short};
 }
-export function pageVisual(project: Project, index: number): PageVisual { return project.pages[index] ?? project.continuation; }
+export function pageVisual(project: Project, index: number): PageVisual {
+  const visual=project.pages[index]??project.continuation,cycle=/^(.+)-cycle-([1-5])$/.exec(visual.design);
+  return cycle?{...visual,design:`${cycle[1]}-v${(Number(cycle[2])-1+index)%5+1}`}:visual;
+}

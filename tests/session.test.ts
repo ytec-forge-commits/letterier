@@ -9,6 +9,19 @@ class Memory implements KeyValueStore {
   async remove(key:string){this.values.delete(key);}
 }
 describe('回復用保存と文書の切り替え',()=>{
+  it.each(['draft','recent-documents','session-current'])('新文書の%s書込み失敗でも前の回復先を保持し、次の保存を再試行できる',async(stage)=>{
+    const store=new Memory(),session=new SessionPersistence(new DocumentRepository(store));
+    const original=replaceRange(newProject(),0,0,'前の文書を保持');original.body.runs[0].style.bold=true;
+    await session.save(original);
+    const next=replaceRange(newProject(),0,0,'新しい文書の合成本文');next.body.runs[0].style.sizePt=24;
+    store.fail=stage==='draft'?`draft-${next.id}`:stage;
+    await expect(session.save(next)).rejects.toThrow('容量不足');
+    expect(await new SessionPersistence(new DocumentRepository(store)).recover()).toEqual(original);
+    store.fail='';
+    await session.save(next);
+    expect(await new SessionPersistence(new DocumentRepository(store)).recover()).toEqual(next);
+    expect((await session.recent())[0].id).toBe(next.id);
+  });
   it('名前未確定の手紙も次回起動で本文と書式を回復できる',async()=>{
     const store=new Memory(),session=new SessionPersistence(new DocumentRepository(store));
     const p=replaceRange(newProject(),0,0,'拝啓\n合成データ');p.body.runs[0].style.bold=true;

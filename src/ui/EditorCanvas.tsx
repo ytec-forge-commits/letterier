@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type FormEvent, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
+import { useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
 import { bodyText, type Project, type TextStyle, type FloatingObject } from '../core/model';
 import { graphemes } from '../core/layout';
 import { type Layout } from '../core/compose';
@@ -8,6 +8,7 @@ import {moveBlockCaret,pickCaretCandidate} from '../core/caret';
 
 export interface TextSelection { start:number; end:number }
 interface Props { uiLanguage:'ja'|'en';currentStyle:TextStyle;project:Project;layout:Layout;zoom:number;selection:TextSelection;caretRequest:number;onSelection:(value:TextSelection)=>void;onInsert:(start:number,end:number,text:string)=>void;onHistory:(redo:boolean)=>void;onFormat:(style:Partial<TextStyle>)=>void;onPage:(page:number)=>void;selectedObject?:string|null;onSelectObject?:(id:string)=>void;onObjectPreview?:(id:string,patch:Partial<FloatingObject>|null)=>void;onObjectChange?:(id:string,patch:Partial<FloatingObject>)=>void;onObjectDelete?:(id:string)=>void }
+interface Props {onTransfer?:(start:number,end:number,target:number,copy:boolean)=>void}
 
 function domOffset(node:Node|null, offset:number):number|null {
   if(!node) return null;
@@ -33,8 +34,22 @@ export function readSelection():TextSelection|null {
 export function EditorCanvas(props:Props) {
   const root=useRef<HTMLDivElement>(null), composing=useRef(false), compositionRange=useRef<TextSelection|null>(null);
   const compositionFinal=useRef<string|null>(null);
+  const compositionPage=useRef(0);
+  const [compositionRevisions,setCompositionRevisions]=useState<Record<number,number>>({});
   const preferTextEnd=useRef<number|null>(null);
   const preferredInline=useRef<number|undefined>(undefined);
+  const draggedText=useRef<{project:Project;selection:TextSelection}|null>(null);
+  const dropOffset=(x:number,y:number)=>{
+    const point=document.caretRangeFromPoint(x,y);
+    if(!point||!root.current?.contains(point.startContainer))return null;
+    const at=domOffset(point.startContainer,point.startOffset);if(at===null)return null;
+    const element=point.startContainer.nodeType===Node.ELEMENT_NODE?point.startContainer as Element:point.startContainer.parentElement;
+    const token=element?.closest<HTMLElement>('[data-offset]');
+    if(!token)return at;
+    let offset=Number(token.dataset.offset),previous=offset;
+    for(const part of graphemes(token.dataset.empty!==undefined?'':token.textContent??'')){previous=offset;offset+=part.length;if(offset>=at)return at-previous<offset-at?previous:offset;}
+    return offset;
+  };
   const restore=(rangeSelection:TextSelection=props.selection,backward=false,focusPage?:number,focusLine?:number)=>{
     if(!root.current||composing.current) return;
     const nodes=Array.from(root.current.querySelectorAll<HTMLElement>('[data-offset]'));
@@ -66,6 +81,7 @@ export function EditorCanvas(props:Props) {
     if(composing.current||event.isComposing||event.inputType==='insertCompositionText')return;
     if(event.inputType==='insertFromComposition'&&compositionFinal.current!==null){event.preventDefault();compositionFinal.current=null;return;}
     const range=readSelection()??props.selection;
+    if(event.inputType==='insertFromDrop'||event.inputType==='deleteByDrag'){event.preventDefault();return;}
     if(event.inputType==='insertText' || event.inputType==='insertReplacementText') {event.preventDefault();insert(event.data??'',range);}
     else if(event.inputType==='insertParagraph'||event.inputType==='insertLineBreak'){event.preventDefault();insert('\n',range);}
     else if(event.inputType.startsWith('delete')) {
@@ -126,16 +142,27 @@ export function EditorCanvas(props:Props) {
     const finish=()=>{delete scroll.dataset.selectingBody;window.removeEventListener('pointerup',finish);window.removeEventListener('pointercancel',finish);};
     window.addEventListener('pointerup',finish);window.addEventListener('pointercancel',finish);
   };
-  return <div className="paper-scroll" ref={root} onPointerDownCapture={beginBodySelection} onKeyDown={keyboard} onInput={handleInput} onDragOver={e=>e.preventDefault()} onDrop={e=>e.preventDefault()}
-    onCompositionStart={()=>{composing.current=true;compositionRange.current=readSelection()??props.selection;}}
-    onCompositionEnd={e=>{composing.current=false;const range=compositionRange.current??props.selection;compositionFinal.current=e.data;insert(e.data,range);compositionRange.current=null;}}
+  return <div className="paper-scroll" ref={root} onPointerDownCapture={beginBodySelection} onKeyDown={keyboard} onInput={handleInput}
+    onDragStart={e=>{
+      const range=readSelection()??props.selection;
+      if(composing.current||!props.onTransfer||range.start===range.end||!(e.target as Element).closest('.page-edit')){e.preventDefault();return;}
+      draggedText.current={project:props.project,selection:range};
+      e.dataTransfer.effectAllowed='copyMove';e.dataTransfer.setData('text/plain',bodyText(props.project).slice(range.start,range.end));
+    }}
+    onDragEnd={()=>{draggedText.current=null;}}
+    onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect=draggedText.current?.project===props.project&&dropOffset(e.clientX,e.clientY)!==null?(e.ctrlKey?'copy':'move'):'none';}}
+    onDrop={e=>{e.preventDefault();const drag=draggedText.current;draggedText.current=null;const target=dropOffset(e.clientX,e.clientY);if(drag?.project===props.project&&target!==null)props.onTransfer?.(drag.selection.start,drag.selection.end,target,e.ctrlKey);}}
+    onCompositionStart={e=>{composing.current=true;compositionRange.current=readSelection()??props.selection;compositionPage.current=Number((e.target as Element).closest<HTMLElement>('.page-edit')?.dataset.pageIndex??0);}}
+    onCompositionEnd={e=>{composing.current=false;const range=compositionRange.current??props.selection;compositionFinal.current=e.data;const page=compositionPage.current;setCompositionRevisions(revisions=>({...revisions,[page]:(revisions[page]??0)+1}));insert(e.data,range);compositionRange.current=null;}}
     onPaste={e=>{e.preventDefault();insert(e.clipboardData.getData('text/plain'));}}
     onCut={e=>{const range=readSelection()??props.selection;if(range.start!==range.end){e.preventDefault();e.clipboardData.setData('text/plain',bodyText(props.project).slice(range.start,range.end));insert('',range);}}}
     onCopy={e=>{const range=readSelection();if(range&&range.start!==range.end){e.preventDefault();e.clipboardData.setData('text/plain',bodyText(props.project).slice(range.start,range.end));}}}>
     {props.layout.pages.map((page,index)=><section key={index} className="sheet-frame" style={{width:`${props.layout.width*96/25.4*props.zoom}px`,height:`${props.layout.height*96/25.4*props.zoom}px`}} aria-label={`${index+1}ページ`}>
       <div className="paper" style={{width:`${props.layout.width}mm`,height:`${props.layout.height}mm`,transform:`scale(${props.zoom})`}}>
         <PageArtwork project={props.project} layout={props.layout} index={index}/>
-        <div className="page-edit" key={`${index}-${props.caretRequest}`} role="textbox" aria-label={`手紙の本文 ${index+1}ページ`} aria-multiline="true" contentEditable suppressContentEditableWarning spellCheck={false} lang={props.uiLanguage} data-page-index={index} data-writing-mode={props.project.settings.writingMode} onClick={e=>clickPaper(e,index)}>
+        {/* Preserve unchanged pages, but reset the composing page even for an IME commit
+            with identical text: the browser may have modified its editable DOM. */}
+        <div className="page-edit" key={JSON.stringify([index,props.project.id,props.uiLanguage,props.project.settings.writingMode,page.lines,page.caretLines,compositionRevisions[index]??0])} role="textbox" aria-label={`手紙の本文 ${index+1}ページ`} aria-multiline="true" contentEditable suppressContentEditableWarning spellCheck={false} lang={props.uiLanguage} data-page-index={index} data-writing-mode={props.project.settings.writingMode} onClick={e=>clickPaper(e,index)}>
           {[...page.lines,...page.caretLines].map((line,i)=><LineContent key={i} index={i} line={line} vertical={props.project.settings.writingMode==='vertical'}/>)}
         </div>
         {props.onSelectObject&&props.onObjectPreview&&props.onObjectChange&&props.onObjectDelete&&<ObjectLayer project={props.project} layout={props.layout} page={index} zoom={props.zoom} selected={props.selectedObject??null} onSelect={props.onSelectObject} onPreview={props.onObjectPreview} onChange={props.onObjectChange} onDelete={props.onObjectDelete}/>}

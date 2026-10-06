@@ -3,6 +3,55 @@ import {useLayoutEffect} from 'react';
 export type UiLanguage='ja'|'en';
 
 const translations:Record<string,string>={
+  '文字間隔（pt）':'Character spacing (pt)',
+  '本文の標準サイズ（pt）':'Default body size (pt)',
+  '段落の最初・最後の1行を別ページに分けない':'Keep first and last paragraph lines together',
+  '段落がページをまたぐとき、最初や最後の1行が単独になるのをできるだけ防ぎます。':'When a paragraph spans pages, avoid leaving its first or last line alone where possible.',
+  '表示倍率スライダー':'Zoom slider',
+  '表示を縮小':'Zoom out','表示を拡大':'Zoom in',
+  '表示倍率を100%に戻す':'Reset zoom to 100%',
+  '100%表示は画面により実寸と異なります':'100% zoom may differ from physical size',
+  '自由配置の要素は200個までです。':'You can add up to 200 positioned items.',
+  'クリップボードを利用できません。本文を選んでCtrl+C・Ctrl+X・Ctrl+Vを使用してください。':'Clipboard access is unavailable. Select body text and use Ctrl+C, Ctrl+X, or Ctrl+V.',
+  '印刷可能範囲：':'Printable area:','mm ／ 上':'mm / Top','上端':'Top edge','印刷倍率：':'Print scale:','%（PDFは100%）':'% (PDF is 100%)',
+  'mm など、用紙の端には印刷できない部分があります。実寸ではその範囲の背景・飾りが切れます。紙面全体を残すには「縮小」を選んでください。':'mm and other paper edges cannot be printed. At actual size, backgrounds and decorations in those areas are clipped. Choose Fit to keep the whole sheet.',
+  'このPCにないフォントは代替フォントで出力されます：':'Fonts missing on this PC are replaced for output:',
+  'チェックしない場合、本文と文字箱を除き、画像・背景・罫線を登録します。':'When unchecked, save images, background, and rules without body text or text boxes.',
+  '登録した便箋から、新しい手紙を作れます。':'Create a new letter from your saved stationery.',
+  '上の「ホーム」から「新規作成」を押します。':'Choose New letter on the Home tab above.',
+  'プリンター一覧を取得できません。Windowsの接続設定を確認してください。PDF出力は利用できます。':'Could not load printers. Check the Windows connection settings. PDF export is still available.',
+  '文字箱の本文が枠からはみ出しています。文字箱の幅・高さを広げるか、文字を小さくしてから出力してください。':'Text overflows a text box. Increase its width or height, or reduce the text size before output.',
+  'ブラウザの印刷画面を開きました。倍率100%・余白なし・ヘッダーとフッターなしで確認してください。':'Opened the browser print dialog. Check 100% scale, no margins, and no headers or footers.',
+  'PDFを保存しました。':'PDF saved.','先にプリンターの印刷可能範囲を確認してください。':'Check the printer printable area first.',
+  'プリンターへ送信しました。用紙の出力結果をご確認ください。':'Sent to the printer. Check the printed result.',
+  'プリンターへ送信しています…':'Sending to the printer…','PDFを作成しています…':'Creating PDF…',
+  'ページ範囲が長すぎます。':'The page range is too long.','ページは「1-3,5」のように指定してください。':'Enter pages in a format such as 1-3,5.',
+  '印刷可能範囲を確認できません。':'Could not determine the printable area.',
+  '点線の内側が印刷できる範囲です。外側の白い部分と点線は印刷されません。':'The area inside the dotted line is printable. The white area outside and the dotted line are not printed.',
+  '▣ 保存':'▣ Save','▱ コピー':'▱ Copy','保存（Ctrl+S）':'Save (Ctrl+S)',
+  '保護版の名前':'Protected version name','現在を保護版にする':'Protect the current version','この状態へ復元する':'Restore this version','プレビューの大きさ':'Preview size',
+  '例：送る前の完成版':'Example: final version before sending','本文のない手紙':'Letter with no body text','まだ保存履歴がありません。':'There are no saved revisions yet.',
+  '履歴を選ぶと、便箋の見た目を確認できます。':'Select a revision to preview its stationery.','復元前の状態':'Before restoration',
+  '通常の履歴は直近50世代。名前を付けた保護版は別に残ります。復元前の状態も履歴に保存します。':'History keeps the latest 50 ordinary revisions plus named protected versions. The state before restoration is also saved.',
+  'フォントのライセンスを読み込めませんでした。アプリを再起動して再度開いてください。':'Could not load the font licenses. Restart the app and open this screen again.',
+  '図案':'Design','続きのページで5図案を順番に使う':'Cycle through five designs on following pages',
+  'この図案はまだ利用できません。':'This design is not available yet.',
+  'ホーム':'Home','挿入':'Insert','レイアウト':'Layout','ヘルプ':'Help','編集リボン':'Editing ribbon',
+  '新規作成':'New letter','便箋変更':'Change stationery','保存':'Save','保存する':'Save','保存しない':"Don't save",'変更を保存しますか？':'Save changes?',
+  'クリップボード':'Clipboard','貼り付け':'Paste','切り取り':'Cut','コピー':'Copy','本文の書式':'Body formatting','便箋':'Stationery',
+  '選択した文字／次に入力する文字':'Selected text / next typed text','本文の書式を一括変更…':'Change body formatting…','本文の書式を一括変更':'Change body formatting','一括変更する':'Apply formatting',
+  '文字サイズを揃える':'Set text size','フォントを揃える':'Set font','一括変更するフォント':'Font to apply','このページの本文':'Body on this page','すべての本文':'Entire body','対象範囲の文字箱も変更する':'Include text boxes in this scope',
+  '色・太字・斜体・下線は維持します。変更後の文字サイズに合わせて、本文の折り返しと自動罫線を計算し直します。':'Color, bold, italic, and underline are preserved. Text wrapping and automatic rules are recalculated for the new size.',
+  'ページ一覧':'Pages','ページ一覧を表示':'Show page thumbnails','配置する要素':'Positioned items','文字の流れ':'Text flow','便箋・罫線':'Stationery and rules','操作画面':'Interface','保存と出力':'Saving and output','ファイル保存':'File saving','手紙':'Letter','出力':'Output',
+  '図の形式':'Picture format','文字箱の形式':'Text box format','移動・拡縮は用紙上で、細かな設定は右側で調整できます。':'Move and resize on the paper; adjust details in the panel on the right.','段落の1行だけを残さない':'Avoid isolated paragraph lines',
+  '任意の色':'Custom color','文字の色（任意の色）':'Text color (custom)','文字の色のパレット':'Text color palette',
+  '回復用データ保存済み・ファイルは未保存':'Recovery saved; file has unsaved changes','ファイル保存済み':'File saved','前回の回復用データを保持しています。':'Previous recovery data is available.','前回の回復用データを開く':'Open previous recovery data',
+  '回復用データの自動保存は、元のファイルへの保存とは別です。':'Automatic recovery saving is separate from saving the original file.',
+  '適用する範囲':'Apply to','すべてのページ':'All pages','指定したページ範囲':'Page range','開始ページ':'First page','終了ページ':'Last page',
+  '今の便箋で登録を更新…':'Update registration from this stationery…','更新する':'Update','選択した登録を現在の手紙のデザインで更新します。作成済みの手紙は変更しません。':'Update the selected registration from the current design. Existing letters are not changed.',
+  '罫線の間隔をフォントに合わせる':'Adjust rule spacing to the font','罫線の太さを標準フォントに合わせる':'Adjust rule thickness to the default font','1行の目安文字数（全角）':'Target full-width characters per line',
+  '標準フォントの全角文字を基準にした目安です。異なるサイズや英数字は実寸で折り返し、大きな文字の行は必要な間隔を確保します。':'A target based on full-width characters in the default font. Mixed sizes and Latin characters wrap by their actual width; larger text gets the spacing it needs.',
+  'プレビューをドラッグして移動。四隅のハンドルで拡縮できます。':'Drag the preview to move the image. Resize using its four corner handles.','紙面に合わせる':'Fill the page','全体を収める':'Fit the entire image','位置と大きさをリセット':'Reset position and size','背景画像を移動':'Move background image',
   'レタリエ':'Letterier','想いを、一枚の手紙に。':'Put your thoughts into a letter.',
   '編集操作':'Editing actions','ファイル':'File','便箋を選ぶ':'Choose stationery','保存履歴':'History',
   '元に戻す':'Undo','やり直す':'Redo','写真・画像':'Photo / Image','文字箱':'Text box','設定・使い方':'Settings & Help','PDF・印刷':'PDF / Print',
@@ -10,7 +59,7 @@ const translations:Record<string,string>={
   '縦向き':'Portrait','横向き':'Landscape','書字方向':'Writing direction','横書き':'Horizontal','縦書き':'Vertical',
   '書き進めると、自動で続きのページが生まれます。':'A new page is added automatically as you continue writing.',
   'ここから次のページ':'Start a new page here','複製・移動・削除…':'Duplicate, move, or delete…','背景・罫線・余白…':'Background, rules, and margins…',
-  '配置した要素':'Placed items','追従':'Flows with text','固定':'Fixed','表示':'Zoom','表示倍率':'Zoom level',
+  '配置した要素':'Placed items','追従':'Flows with text','固定':'Fixed','表示':'View','表示倍率':'Zoom level',
   'ページ':'Page','文字':' characters','ページ · 100%表示は画面により実寸と異なります':' pages · 100% zoom may differ from physical size','手紙の本文':'Letter body','ここから、お手紙を。':'Start your letter here.',
   '標準フォント':'Default font','本文の基本フォントです。書き始める前にも選べ、個別に変更していない文字へ反映されます。':'The default font for body text. You can choose it before writing; it applies to text without individual formatting.',
   '本文の標準フォント':'Default body font','選んだフォントを一括適用':'Apply selected font','標準フォントに揃える範囲':'Apply default font to','このページ':'This page','全ページ':'All pages','このページの本文を揃える':'Apply to this page','すべての本文を揃える':'Apply to all pages',
@@ -48,6 +97,7 @@ const translations:Record<string,string>={
   'まだ登録されていません。':'No templates saved yet.','本文を含む':'Includes text','デザインのみ':'Design only','プレビューの書字方向':'Preview writing direction',
   '最初のページと、続きのページ':'First and continuation pages','登録を削除する':'Delete saved template','戻る':'Back','登録を削除…':'Delete saved template…',
   '今の手紙にデザインを適用':'Apply design to this letter','この便箋で新しい手紙':'Start a new letter with this stationery',
+  '便箋変更では、本文・書式・自分で追加した写真を保持し、選択した範囲の背景・罫線・余白と便箋の飾りを変更します。「元に戻す」で戻せます。新規作成の前には、未保存の変更を保存するか確認します。':'Changing stationery keeps your body text, formatting, and added photos, and replaces the background, rules, margins, and stationery decorations in the selected scope. Undo restores the previous design. Before creating a new letter, you are asked whether to save unsaved changes.',
   'デザインを適用すると、全ページの背景・罫線・余白が選んだ便箋に変わります。「元に戻す」で戻せます。新しい手紙を作る前に、今の手紙を自動保存します。':'Applying a design changes the background, rules, and margins on every page. You can restore the previous design with Undo. Your current letter is autosaved before a new letter is created.',
   'キャンセル':'Cancel','この設定を適用':'Apply settings','削除':'Delete','複製':'Duplicate','移動':'Move','配置方法':'Placement','ページの位置へ固定':'Fix to page position',
   'このページにある次の内容を、まとめて操作します。あとから「元に戻す」で操作全体を戻せます。':'The following content on this page will be handled together. You can undo the whole operation afterward.',
@@ -75,6 +125,11 @@ const translations:Record<string,string>={
 };
 
 const replacements:Array<[RegExp,string|((...args:string[])=>string)]>=[
+  [/^このPCにないフォント：([\s\S]*)。代替フォントで表示・出力します。元のフォント名は保持しています。$/,(_all,names)=>`Fonts missing on this PC: ${names}. A substitute font is used for display and output. The original font names are preserved.`],
+  [/^ページ番号は1〜(\d+)の範囲で指定してください。$/,(_all,n)=>`Enter page numbers from 1 to ${n}.`],
+  [/^「([\s\S]*)」の登録を削除します。$/,(_all,name)=>`Delete the saved template “${name}”.`],
+  [/^(\d+)ページへ移動$/,(_all,n)=>`Go to page ${n}`],[/^文字の色 (#[0-9a-fA-F]{6})$/,(_all,color)=>`Text color ${color}`],
+  [/^「(.+)」には、ファイルへ保存していない変更があります。$/,(_all,title)=>`“${title}” has changes that have not been saved to the file.`],
   [/^ページ (\d+)$/,(_all,n)=>`Page ${n}`],[/^(\d+)文字$/,(_all,n)=>`${n} characters`],[/^(\d+)ページ · 100%表示は画面により実寸と異なります$/,(_all,n)=>`${n} pages · 100% zoom may differ from physical size`],
   [/^手紙の本文 (\d+)ページ$/,(_all,n)=>`Letter body, page ${n}`],[/^(\d+)ページ$/,(_all,n)=>`Page ${n}`],
   [/^(\d+)ページ ／ 追従$/,(_all,n)=>`Page ${n} / Flows with text`],[/^(\d+)ページ ／ 固定$/,(_all,n)=>`Page ${n} / Fixed`],
@@ -97,7 +152,7 @@ export function translateUiText(value:string,language:UiLanguage):string{
 
 const originalText=new WeakMap<Text,string>();
 const originalAttributes=new WeakMap<Element,Map<string,string>>();
-const skipped=(element:Element|null)=>Boolean(element?.closest('.body-line,.text-object,textarea,input,script,style'));
+const skipped=(element:Element|null)=>Boolean(element?.closest('.body-line,.text-object,textarea,input,script,style,[translate="no"]'));
 
 export function localizeDom(root:ParentNode,language:UiLanguage){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);

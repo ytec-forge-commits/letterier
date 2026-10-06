@@ -5,7 +5,7 @@ const cache=new Map<string,number>();
 let context: CanvasRenderingContext2D|null=null;
 export function fontStack(family: string) { return `${JSON.stringify(bundledFamily(family))}, "Yu Mincho", "ＭＳ 明朝", serif`; }
 export function textCss(style: TextStyle): CSSProperties {
-  return {fontFamily:fontStack(style.fontFamily),fontSize:`${style.sizePt}pt`,fontWeight:style.bold?700:400,fontStyle:style.italic?'italic':'normal',fontSynthesis:'weight style',textDecoration:style.underline?'underline':'none',color:style.color,fontKerning:'none',fontVariantLigatures:'none'};
+  return {fontFamily:fontStack(style.fontFamily),fontSize:`${style.sizePt}pt`,fontWeight:style.bold?700:400,fontStyle:style.italic?'italic':'normal',fontSynthesis:'weight style',textDecoration:style.underline?'underline':'none',color:style.color,fontKerning:'none',fontVariantLigatures:'none',...(style.letterSpacingPt?{letterSpacing:`${style.letterSpacingPt}pt`}:{})};
 }
 export function measureText(text: string, style: TextStyle): number {
   const key=`${style.fontFamily}/${style.sizePt}/${style.bold}/${style.italic}/${text}`;
