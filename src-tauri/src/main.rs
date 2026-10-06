@@ -11,6 +11,7 @@ use tauri::Manager;
 async fn close_app(app:tauri::AppHandle)->Result<(),String>{window_state::save(&app);app.exit(0);Ok(())}
 fn main() {
     tauri::Builder::default()
+        .manage(window_state::WindowState::default())
         .manage(activation::Requests::default())
         .plugin(tauri_plugin_single_instance::init(|app,args,cwd|{
             activation::enqueue(app,args.into_iter().skip(1),std::path::Path::new(&cwd));
@@ -23,7 +24,13 @@ fn main() {
             app.manage(storage::StorageState::new(root));
             activation::enqueue(app.handle(),std::env::args().skip(1),&std::env::current_dir()?);
             window_state::restore(app.handle());
+            window_state::remember(app.handle());
             Ok(())
+        })
+        .on_window_event(|window,event|{
+            if window.label()=="main" && matches!(event,tauri::WindowEvent::Resized(_) | tauri::WindowEvent::Moved(_) | tauri::WindowEvent::ScaleFactorChanged { .. }) {
+                window_state::remember(window.app_handle());
+            }
         })
         .invoke_handler(tauri::generate_handler![close_app,activation::take_launch_document,images::decode_heif,fonts::installed_fonts,printers::list_printers,printers::printer_area,output::export_pdf, output::print_document, output::qa_export_pdf, storage::open_document,storage::save_document,storage::local_read,storage::local_write,storage::local_remove])
         .build(tauri::generate_context!())

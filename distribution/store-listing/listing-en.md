@@ -32,7 +32,7 @@ Letterier has no account, advertising, analytics, or cloud sync. Documents, imag
 
 ## What's new
 
-Letterier 1.0.4 is the first Microsoft Store release. It includes bilingual UI, vertical and horizontal writing, twenty stationery designs, cross-page image and text-box movement, history, PDF and print output, and detailed Japanese and English manuals.
+Version 2.0.0 adds reusable personal stationery, drag-to-position backgrounds, a target line-length setting, and font-size-aware automatic rules. Adjust character spacing and the default body size, use the bottom-right zoom slider, recognize Save by its floppy-disk icon, and find clearer paragraph controls. Dismissible screens close on outside clicks, and the output dialog prioritizes printing. The next launch restores the saved window size. Japanese and English manuals have been updated.
 
 ## URLs
 
@@ -51,3 +51,6 @@ letter, stationery, vertical writing, PDF, print, photo, postcard, offline
 2. Write directly on the page with clear horizontal editing.
 3. Add an independent text box and place it freely.
 4. Switch language, interface colors, and larger controls in Settings & Help.
+5. Set the default body font and size, and choose paragraph pagination behavior.
+
+The five 2.0.0 images run from `images/en-01-stationery-2.0.0.png` to `images/en-05-layout-2.0.0.png`. See the [screenshot preparation record](screenshots-2.0.0.md) for capture and verification scope. Older images are preserved.

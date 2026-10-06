@@ -1,6 +1,18 @@
-# Node/Tauri may inherit a different PowerShell edition's module search path.
-if (-not (Get-PSDrive -Name Cert -ErrorAction SilentlyContinue)) {
-    Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
+function Test-LetterierEmbeddedSignature {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate,
+        [switch]$RequireTimestamp
+    )
+    if ($PSVersionTable.PSVersion.Major -lt 7) { throw 'Embedded verification requires PowerShell 7 with its existing policy.' }
+    if (-not ('Letterier.Release.EmbeddedSignature' -as [type])) {
+        Add-Type -AssemblyName System.Security.Cryptography.Pkcs
+        $references = @(Get-ChildItem -LiteralPath (Join-Path $PSHOME 'ref') -Filter '*.dll' | ForEach-Object FullName)
+        $references += [System.Security.Cryptography.Pkcs.SignedCms].Assembly.Location
+        Add-Type -Path (Join-Path $PSScriptRoot 'EmbeddedSignature.cs') -ReferencedAssemblies $references
+    }
+    $resolved = (Resolve-Path -LiteralPath $Path).Path
+    return [Letterier.Release.EmbeddedSignature]::Verify($resolved, $Certificate.RawData, [bool]$RequireTimestamp)
 }
 
 function Get-LetterierWindowsSdkTool {
@@ -46,8 +58,14 @@ function Test-LetterierPrivateKeyNonExportable {
 function Get-LetterierSigningCertificate {
     $now = Get-Date
     $codeSigningOid = '1.3.6.1.5.5.7.3.3'
-    $certificate = Get-ChildItem -LiteralPath 'Cert:\CurrentUser\My' |
+    # Continue the existing published identity, rather than selecting the newest
+    # of several historical Y-TEC certificates. This reads public DER only.
+    $pinPath = Join-Path $PSScriptRoot '../output/release-1.0.4/Y-TEC-CodeSigning-Public.cer'
+    $pin = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new((Resolve-Path -LiteralPath $pinPath).Path)
+    try {
+    $certificate = @(Get-ChildItem -LiteralPath 'Cert:\CurrentUser\My' |
         Where-Object {
+            $_.Thumbprint -eq $pin.Thumbprint -and
             $_.Subject -eq 'CN=Y-TEC' -and
             $_.Issuer -eq $_.Subject -and
             $_.HasPrivateKey -and
@@ -57,11 +75,10 @@ function Get-LetterierSigningCertificate {
                 if ($_.ObjectId -is [System.Security.Cryptography.Oid]) { $_.ObjectId.Value } else { [string]$_.ObjectId }
             }) -and
             (Test-LetterierPrivateKeyNonExportable -Certificate $_)
-        } |
-        Sort-Object NotAfter -Descending |
-        Select-Object -First 1
-    if (-not $certificate) { throw 'No eligible Y-TEC self-signed code-signing certificate was found.' }
-    return $certificate
+        })
+    if ($certificate.Count -ne 1) { throw 'Exactly one eligible signer matching the prior published public certificate is required.' }
+    return $certificate[0]
+    } finally { $pin.Dispose() }
 }
 
 function Assert-LetterierSignature {
@@ -75,10 +92,16 @@ function Assert-LetterierSignature {
     if (-not $signature.SignerCertificate) { throw "Authenticode signature is missing: $resolved" }
     if ($signature.SignerCertificate.Thumbprint -ne $Certificate.Thumbprint) { throw "The signer does not match the exported Y-TEC certificate: $resolved" }
     if ($RequireTimestamp -and -not $signature.TimeStamperCertificate) { throw "RFC 3161 timestamp is missing: $resolved" }
-    if ($signature.Status -ne 'Valid') {
-        $allowed = $signature.Status -in @('UnknownError', 'NotTrusted')
-        $selfSigned = $signature.SignerCertificate.Subject -eq $signature.SignerCertificate.Issuer
-        if (-not ($allowed -and $selfSigned)) { throw "Authenticode verification failed: $resolved ($($signature.Status))" }
+    $selfSigned = $Certificate.Subject -eq $Certificate.Issuer
+    $possiblePinnedRootWarning = $selfSigned -and $signature.Status -in @('UnknownError', 'NotTrusted')
+    if ($signature.Status -ne 'Valid' -and -not $possiblePinnedRootWarning) {
+        throw "Authenticode verification failed: $resolved ($($signature.Status))"
+    }
+    # Even a Windows Valid status does not replace our pinned signer/digest/
+    # RFC3161 checks. Root warnings pass only with independent crypto proof.
+    $proof = Test-LetterierEmbeddedSignature -Path $resolved -Certificate $Certificate -RequireTimestamp:$RequireTimestamp
+    if (-not $proof.DigestValid -or -not $proof.CmsValid -or ($RequireTimestamp -and -not $proof.TimestampValid)) {
+        throw "Independent Authenticode verification failed: $resolved"
     }
     return $signature
 }

@@ -1,50 +1,78 @@
-param()
+param(
+    [switch]$CompleteExistingBuild,
+    [string]$ExpectedBinarySHA256,
+    [string]$ExpectedInstallerSHA256
+)
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'code-signing.ps1')
+. (Join-Path $PSScriptRoot 'signing-host.ps1')
+. (Join-Path $PSScriptRoot 'direct-release-documents.ps1')
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $package = Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'package.json') | ConvertFrom-Json
 $version = [string]$package.version
 $tauriConfig = Get-Content -Raw -Encoding utf8 -LiteralPath (Join-Path $projectRoot 'src-tauri\tauri.conf.json') | ConvertFrom-Json
 $productName = [string]$tauriConfig.productName
 $outputRoot = Join-Path $projectRoot "output\release-$version"
+if ($CompleteExistingBuild) {
+    # A failed attempt is retained; complete the exact observed build into a
+    # fresh output rather than rebuilding, overwriting or deleting evidence.
+    $outputRoot = Join-Path $projectRoot ("output\release-$version-completed-" + [Guid]::NewGuid().ToString('N'))
+}
 if (Test-Path -LiteralPath $outputRoot) { throw "Refusing to overwrite an existing release candidate: $outputRoot" }
 $temporaryRoot = Join-Path $projectRoot ('.local\direct-release-' + [Guid]::NewGuid().ToString('N'))
 $configPath = Join-Path $temporaryRoot 'tauri-signing.json'
 $stage = Join-Path $temporaryRoot "Letterier-$version-windows-x64-self-signed"
 $extract = Join-Path $temporaryRoot 'verify-extract'
 $signingScript = (Join-Path $PSScriptRoot 'sign-release-artifact.ps1').Replace('\','/')
+$signingInvocation = Get-LetterierSigningInvocation -ScriptPath $signingScript -ArtifactPath '%1'
+$binary = Join-Path $projectRoot ('.local\cargo-target\release\' + $productName + '.exe')
+$installer = Join-Path $projectRoot ('.local\cargo-target\release\bundle\nsis\' + $productName + '_' + $version + '_x64-setup.exe')
+if ($CompleteExistingBuild) {
+    if ($ExpectedBinarySHA256 -notmatch '^[0-9a-fA-F]{64}$' -or $ExpectedInstallerSHA256 -notmatch '^[0-9a-fA-F]{64}$' -or
+        (Get-FileHash -LiteralPath $binary -Algorithm SHA256).Hash -ne $ExpectedBinarySHA256 -or
+        (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash -ne $ExpectedInstallerSHA256) {
+        throw 'Existing build byte pin mismatch; no build, signing or output creation attempted.'
+    }
+}
+$certificate = Get-LetterierSigningCertificate
+if ($CompleteExistingBuild) { $null=Assert-LetterierSignature -Path $installer -Certificate $certificate -RequireTimestamp }
 try {
     New-Item -ItemType Directory -Path $temporaryRoot,$stage,$outputRoot | Out-Null
+    $prebuild = Join-Path $temporaryRoot 'prebuild'
+    New-Item -ItemType Directory -Path $prebuild | Out-Null
+    $prebuildHashes = foreach ($source in @($binary,$installer)) {
+        if (Test-Path -LiteralPath $source -PathType Leaf) {
+            $before = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+            $copy = Join-Path $prebuild (Split-Path -Leaf $source)
+            Copy-Item -LiteralPath $source -Destination $copy -ErrorAction Stop
+            if ((Get-FileHash -LiteralPath $copy -Algorithm SHA256).Hash -ne $before) { throw 'Prebuild preservation hash mismatch.' }
+            '{0}  {1}' -f $before.ToLowerInvariant(), (Split-Path -Leaf $copy)
+        }
+    }
+    [IO.File]::WriteAllLines((Join-Path $prebuild 'PREBUILD-SHA256SUMS.txt'),[string[]]@($prebuildHashes),[Text.UTF8Encoding]::new($false))
     $signingConfig = @{
-        bundle = @{ windows = @{ signCommand = @{ cmd = 'powershell.exe'; args = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$signingScript,'-Path','%1') } } }
+        bundle = @{ windows = @{ signCommand = $signingInvocation } }
     } | ConvertTo-Json -Depth 8
     [System.IO.File]::WriteAllText($configPath, $signingConfig, [System.Text.UTF8Encoding]::new($false))
 
-    Push-Location $projectRoot
-    try {
-        & node scripts/native.mjs tauri build --config $configPath
-        if ($LASTEXITCODE -ne 0) { throw 'The signed Tauri build failed.' }
+    if (-not $CompleteExistingBuild) {
+        Push-Location $projectRoot
+        try {
+            & node scripts/native.mjs tauri build --config $configPath
+            if ($LASTEXITCODE -ne 0) { throw 'The signed Tauri build failed.' }
+        }
+        finally { Pop-Location }
     }
-    finally { Pop-Location }
 
-    $binary = Join-Path $projectRoot ('.local\cargo-target\release\' + $productName + '.exe')
-    $installer = Join-Path $projectRoot ('.local\cargo-target\release\bundle\nsis\' + $productName + '_' + $version + '_x64-setup.exe')
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'sign-release-artifact.ps1') -Path $binary
-    if ($LASTEXITCODE -ne 0) { throw 'Signing the portable application executable failed.' }
-    $certificate = Get-LetterierSigningCertificate
-    $null = Assert-LetterierSignature -Path $binary -Certificate $certificate -RequireTimestamp
+    # Tauri restores the unsigned/unpatched main EXE after embedding the signed
+    # NSIS variant. Sign that portable variant once, only if truly unsigned.
+    Invoke-LetterierUnsignedArtifactSigning -Path $binary -Certificate $certificate -ScriptPath $signingScript
     $null = Assert-LetterierSignature -Path $installer -Certificate $certificate -RequireTimestamp
 
     Copy-Item -LiteralPath $binary -Destination (Join-Path $stage 'Letterier.exe')
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\manual') -Destination (Join-Path $stage 'manual') -Recurse
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'public\legal') -Destination (Join-Path $stage 'legal') -Recurse
+    Copy-LetterierDirectDocuments -ProjectRoot $projectRoot -Stage $stage
     Copy-Item -LiteralPath (Join-Path $projectRoot ("output\pdf\Letterier-Manual-ja-$version.pdf")) -Destination $stage
     Copy-Item -LiteralPath (Join-Path $projectRoot ("output\pdf\Letterier-Manual-en-$version.pdf")) -Destination $stage
-    Copy-Item -LiteralPath (Join-Path $projectRoot 'distribution\README-VECTOR.txt') -Destination $stage
-    foreach ($name in @('README.md','README.en.md','LICENSE','NOTICE','THIRD_PARTY_NOTICES.md','ASSETS_LICENSE.md','BRAND_POLICY.md','LICENSE_EXCEPTIONS.md','PRIVACY.md','IMAGE-FORMATS.md','CODE_SIGNING_POLICY.md','CHANGELOG.md')) {
-        Copy-Item -LiteralPath (Join-Path $projectRoot $name) -Destination $stage
-    }
-    & (Join-Path $PSScriptRoot 'repair-release-document-links.ps1') -StagePath $stage
     $notice = @"
 Letterier $version - Windows x64 direct distribution
 
@@ -70,8 +98,8 @@ Read README-VECTOR.txt first for system requirements, installation, removal, lic
     $extractedBinary = Get-ChildItem -LiteralPath $extract -Recurse -File -Filter 'Letterier.exe' | Select-Object -First 1
     if (-not $extractedBinary) { throw 'The portable ZIP is missing Letterier.exe.' }
     $null = Assert-LetterierSignature -Path $extractedBinary.FullName -Certificate $certificate -RequireTimestamp
-    $privateFiles = Get-ChildItem -LiteralPath $extract -Recurse -File | Where-Object { $_.Extension -in @('.pfx','.p12','.key','.pem') }
-    if ($privateFiles) { throw 'A private-key file format was found in the portable ZIP.' }
+    $null = Assert-LetterierSignature -Path $publishedInstaller -Certificate $certificate -RequireTimestamp
+    Assert-LetterierDirectDocuments -Stage $extractedBinary.Directory.FullName
 
     $published = @($archive,$publishedInstaller,$jaManual,$enManual,$certificatePath)
     $hashLines = foreach ($file in $published) {
@@ -88,9 +116,6 @@ Read README-VECTOR.txt first for system requirements, installation, removal, lic
 }
 finally {
     if (Test-Path -LiteralPath $temporaryRoot) {
-        $resolvedTemporary = [System.IO.Path]::GetFullPath($temporaryRoot)
-        $resolvedLocal = [System.IO.Path]::GetFullPath((Join-Path $projectRoot '.local')).TrimEnd('\') + '\'
-        if (-not $resolvedTemporary.StartsWith($resolvedLocal, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Temporary directory safety check failed.' }
-        Remove-Item -LiteralPath $resolvedTemporary -Recurse -Force
+        Write-Output "SIGNING_EVIDENCE_RETAINED=$temporaryRoot"
     }
 }

@@ -114,4 +114,36 @@ mod tests {
         let dir=tempfile::tempdir().unwrap();assert!(local_path(dir.path(),"draft-123").unwrap().starts_with(dir.path()));
         for key in ["../outside","C:\\secret","a/b","a\\b","CON","", "."] { assert!(local_path(dir.path(),key).is_err()); }
     }
+    #[test]
+    fn externally_deleted_document_is_not_silently_recreated() {
+        let dir=tempfile::tempdir().unwrap();let path=dir.path().join("synthetic.binsen");
+        let original=atomic_save(&path,b"original",None).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        assert!(atomic_save(&path,b"unsaved replacement",Some(&original)).is_err());
+        assert!(!path.exists());
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),0);
+    }
+    #[test]
+    fn directory_target_and_its_contents_survive_failed_save() {
+        let dir=tempfile::tempdir().unwrap();let target=dir.path().join("synthetic.binsen");
+        std::fs::create_dir(&target).unwrap();let child=target.join("keep.txt");
+        std::fs::write(&child,b"synthetic preserved content").unwrap();
+        assert!(atomic_save(&target,b"replacement",None).is_err());
+        assert_eq!(std::fs::read(&child).unwrap(),b"synthetic preserved content");
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),1);
+    }
+    #[cfg(windows)]
+    #[test]
+    fn exclusive_windows_file_lock_preserves_original_and_allows_retry() {
+        use std::os::windows::fs::OpenOptionsExt;
+        let dir=tempfile::tempdir().unwrap();let path=dir.path().join("synthetic.binsen");
+        let original=atomic_save(&path,b"original",None).unwrap();
+        let held=std::fs::OpenOptions::new().read(true).share_mode(0).open(&path).unwrap();
+        let result=atomic_save(&path,b"replacement",Some(&original));
+        drop(held);
+        assert!(result.is_err());assert_eq!(std::fs::read(&path).unwrap(),b"original");
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(),1);
+        atomic_save(&path,b"replacement",Some(&original)).unwrap();
+        assert_eq!(std::fs::read(&path).unwrap(),b"replacement");
+    }
 }

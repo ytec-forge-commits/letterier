@@ -31,11 +31,19 @@
 
 ## テンプレート装飾（生成素材）
 
-`public/template-art/` のPNGは、レタリエのテンプレート装飾用にCodex ImageGenで生成した素材です。既存の制作記録には生成日を2026-09-08と記載しています。文字・ロゴ・透かしは含めず、アプリ内のテンプレート表示に使用します。
+2026-10-02追加の桜・菜の花・朝顔・金魚・紅葉・月とすすき・雪の庭・椿の便り・ミモザ・チューリップ・シーサイドブルー・レモンの便り・秋色リーフ・森の実り・スノークリスタル・クリスマスリース・白の和紙・藍の市松・クラシックレター・パステルドットの図案2〜5（計160枚の透過PNG）の生成手段、最終プロンプト、SHA-256、採用・検証範囲は [ASSET_PROVENANCE.md](ASSET_PROVENANCE.md) に記録しています。既存素材は置き換えていません。本体のApache-2.0をこれらの素材へ自動適用しません。
 
-`public/template-motifs/` の透過PNGは、本文領域の外へ配置するレタリエ専用素材としてCodex ImageGenで生成した素材です。既存の制作記録には全面再生成日を2026-09-14と記載しています。17種類それぞれに内容の異なる主役素材と `-companion` 付きの脇役素材を用意し、同じ画像を1枚の便箋内で複製配置していません。
+2026-10-06に、OpenAIの[個人向け利用規約](https://openai.com/policies/terms-of-use/)のContent条項、[Services Agreement](https://openai.com/policies/services-agreement/)のCustomer Content条項、[Service Terms](https://openai.com/policies/service-terms/)、[Sharing & Publication Policy](https://openai.com/policies/sharing-publication-policy/)を確認しました。利用者とOpenAIの間では、法令の許す範囲で利用者がOutputを所有する一方、第三者の権利を侵害しない責任、出力の確認、AI生成である旨の開示が必要です。レタリエ用に生成・目視採用した素材を本アプリへ同梱する範囲の確認であり、第三者権利の不存在・著作権成立・独占性を保証しません。素材単体の別ライセンス付与は行わず、既存のアプリ用素材としての扱いを維持します。
 
-2026-09-28、Y-TECの管理者から、便箋イラスト55点と製品アイコン・ロゴはCodexによる制作であり、現在の素材・ブランド条件で公開・再配布してよい旨の確認を受けました。現在の全55点およびブランドファイルのパス・SHA-256・サイズは [素材来歴台帳](public/legal/asset-provenance.json) に記録しています。配布物では `legal/asset-provenance.json` を参照してください。
+`public/template-art/` のPNGは、レタリエのテンプレート装飾用にCodex ImageGenで生成したオリジナル素材です（生成日: 2026-09-08）。文字・ロゴ・透かしは含めず、アプリ内のテンプレート表示にのみ使用します。生成サービスの利用条件および再配布条件は、配布時点のサービス規約を確認してください。各ファイルは再生成時にハッシュを更新します。
 
-制作モデルの詳細と第三者画像の入力・参照の有無は確認できていないため、不明として台帳に残しています。既存記録の制作日を、今回独立に確認した実行日時とは扱いません。この確認は素材単体の自由な再配布許諾や第三者の権利が存在しないことの保証ではありません。既存の [ブランド条件](BRAND_POLICY.md) と [ライセンス適用範囲](LICENSE_EXCEPTIONS.md) を維持します。
+`public/template-motifs/` の透過PNGは、本文領域の外へ配置するレタリエ専用素材としてCodex ImageGenで新規生成したオリジナル素材です（全面再生成日: 2026-09-14）。17種類それぞれに内容の異なる主役素材と `-companion` 付きの脇役素材を用意し、同じ画像を1枚の便箋内で複製配置していません。
+
+| ファイル | 適用テンプレート | SHA-256 |
+| --- | --- | --- |
+| `sakura.png` | sakura / nanohana / mimosa / tulip / dots | `93476BD01E96F924CE81397B0CDA843AFB211672E498F96362847A1BEA3041D7` |
+| `summer-water.png` | asagao / goldfish / seaside / lemon / ichimatsu | `8D48E401CC4DCC8D724A7D4BFA86854110428BA9DE6189D289FC5C2A4C0D6A16` |
+| `autumn-maple.png` | momiji / moon / autumn-leaf / woodland | `D796DE5FF3336AD524379F515FD541836DCA7C6BC6B58EF13875D2B78986D2D2` |
+| `winter-garden.png` | snow-garden / camellia / snowflake / washi | `F5CE60B23A34E889832B8EF27609DB24573D7359FB619A051D2A8D57AC236E6C` |
+| `christmas.png` | christmas / classic | `E4EC59105456DC313047BE0C39863BC416AE005EE0FB42C5EE829C52EBFF8065` |
 

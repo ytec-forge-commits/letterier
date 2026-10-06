@@ -1,12 +1,16 @@
 import { bodyText, paperSize, pageVisual, type Project, type TextStyle, type FloatingObject, type PageVisual } from './model';
 import { graphemes, lineEnd } from './layout';
+import {decorationMotifLayout,illustratedTemplateIds} from './stationery-layout';
+import {resolveStationeryArtwork} from './stationery-artwork';
 export interface Token { text: string; start: number; end: number; advance: number; style: TextStyle; tcy: boolean }
 export interface LayoutLine { pageIndex: number; x: number; y: number; extent: number; spacing: number; start: number; end: number; tokens: Token[]; breakAfter?: '\n' | '\f';breakText?:string }
-export interface LayoutPage { index: number; visual: PageVisual; lines: LayoutLine[]; caretLines: LayoutLine[]; start: number; end: number }
+export interface LayoutPage { index: number; visual: PageVisual; lines: LayoutLine[]; caretLines: LayoutLine[]; rulingTracks?: Pick<LayoutLine,'x'|'y'|'extent'|'spacing'>[]; start: number; end: number }
 export interface PlacedObject extends FloatingObject { actualX: number; actualY: number; actualPage: number }
 export interface Layout { width: number; height: number; pages: LayoutPage[]; objects: PlacedObject[]; warnings: string[] }
 export type Measure = (text: string, style: TextStyle) => number;
 export const emMm = (style: TextStyle) => style.sizePt * 25.4 / 72;
+export const automaticRulingSpacing = (style: TextStyle) => Math.max(4,Math.ceil(emMm(style)*1.6*2)/2);
+export const automaticRulingWidth = (style: TextStyle) => Math.round(Math.max(.1,Math.min(.3,.15*Math.sqrt(style.sizePt/14)))*1000)/1000;
 export function tokenize(project: Project, measure: Measure): Token[] {
   const vertical = project.settings.writingMode === 'vertical';
   const text = bodyText(project);
@@ -26,7 +30,8 @@ export function tokenize(project: Project, measure: Measure): Token[] {
         piece+=chars[++i]; tcy=true;
       }
       offset+=piece.length;
-      const advance = /[\n\f]/.test(piece) ? 0 : tcy ? emMm(style) : vertical && !/^[\u0020-\u007e]+$/.test(piece) ? emMm(style) : measure(piece,style);
+      // LineContent renders vertical text upright, except the explicitly rotated ASCII brackets.
+      const advance = /[\n\f]/.test(piece) ? 0 : (tcy ? emMm(style) : vertical && !/^[()[\]{}<>]$/.test(piece) ? emMm(style) : measure(piece,style)) + (style.letterSpacingPt??0)*25.4/72;
       tokens.push({text:piece,start,end:offset,advance,style,tcy});
     }
   }
@@ -54,30 +59,73 @@ export function objectBounds(object: PlacedObject, padded=true) {
   return {left:object.actualX+(object.width-width)/2-pad,right:object.actualX+(object.width+width)/2+pad,top:object.actualY+(object.height-height)/2-pad,bottom:object.actualY+(object.height+height)/2+pad};
 }
 
-function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced: Set<number>): Layout {
+function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced: Set<number>, measure: Measure): Layout {
   const {width,height}=paperSize(project), vertical=project.settings.writingMode==='vertical';
   const pages: LayoutPage[]=[];
   const warnings=new Set<string>();
   const minimum=Math.max(project.pages.length,...objects.filter(o=>o.anchorMode==='page').map(o=>o.actualPage+1),1);
   let cursor=0, pageIndex=0, trailing=false;
   do {
-    const visual=pageVisual(project,pageIndex), m=visual.ruling.margins, spacing=visual.ruling.spacingMm;
-    const tracks=Math.floor((vertical?width-m.left-m.right:height-m.top-m.bottom)/spacing+0.000001);
+    const visual=pageVisual(project,pageIndex), m={...visual.ruling.margins}, minimumSpacing=visual.ruling.autoSpacing?automaticRulingSpacing(project.baseStyle):visual.ruling.spacingMm;
+    const artwork=resolveStationeryArtwork(visual.design);
+    const motifs=artwork&&(artwork.primary||illustratedTemplateIds.has(artwork.id))?decorationMotifLayout(artwork.id,width,height,project.settings.writingMode,artwork.continuation).placements:[];
+    const count=visual.ruling.charactersPerLine;
+    if(count!==undefined) {
+      const available=vertical?height-m.top-m.bottom:width-m.left-m.right;
+      const target=count*((vertical?emMm(project.baseStyle):measure('あ',project.baseStyle))+(project.baseStyle.letterSpacingPt??0)*25.4/72);
+      if(target>available+.001)warnings.add('指定した1行の文字数は現在のフォント・用紙に収まりません。本文幅は用紙に収まる範囲に制限しています。');
+      const inset=Math.max(0,(available-target)/2);
+      if(vertical){m.top+=inset;m.bottom+=inset;}else{m.left+=inset;m.right+=inset;}
+    }
+    const crossExtent=vertical?width-m.left-m.right:height-m.top-m.bottom;
+    const tracks=Math.floor(crossExtent/minimumSpacing+0.000001);
     const extent=vertical?height-m.top-m.bottom:width-m.left-m.right;
     if(tracks<1 || extent<1 || !Number.isFinite(tracks)) throw new Error('余白が広すぎて本文を置けません。余白または罫線間隔を小さくしてください。');
-    const page: LayoutPage={index:pageIndex,visual,lines:[],caretLines:[],start:tokens[cursor]?.start??bodyText(project).length,end:tokens[cursor]?.start??bodyText(project).length};
+    const page: LayoutPage={index:pageIndex,visual,lines:[],caretLines:[],rulingTracks:[],start:tokens[cursor]?.start??bodyText(project).length,end:tokens[cursor]?.start??bodyText(project).length};
     pages.push(page);
     let pageBreak=false;
     trailing=false;
+    let crossUsed=0;
     for(let row=0;row<tracks && !pageBreak;row++) {
-      const x=vertical?width-m.right-(row+1)*spacing:m.left;
-      const y=vertical?m.top:m.top+row*spacing;
-      const cuts: [number,number][]=[];
-      for(const object of objects.filter(o=>o.actualPage===pageIndex && o.wrap)) {
-        const box=objectBounds(object);
-        if(vertical ? box.left<x+spacing && box.right>x : box.top<y+spacing && box.bottom>y) cuts.push(vertical?[box.top,box.bottom]:[box.left,box.right]);
+      let spacing=minimumSpacing;
+      let x=0,y=0,intervals:[number,number][]=[];
+      // Larger glyphs change the occupied band and therefore the wrapping cuts.
+      // Plan without consuming tokens until the band's size has stabilized.
+      const adaptive=count!==undefined||visual.ruling.autoSpacing===true;
+      for(let attempt=0;attempt<=tokens.length+1;attempt++) {
+        x=vertical?width-m.right-crossUsed-spacing:m.left;
+        y=vertical?m.top:m.top+crossUsed;
+        const cuts:[number,number][]=[];
+        // Keep the configured body margins, but wrap each occupied text band
+        // around the same corner artwork that the ruling already avoids.
+        // Recompute when mixed font sizes expand the band's spacing.
+        for(const box of motifs){
+          if(vertical?box.x-1<x+spacing&&box.x+box.width+1>x:box.y-1<y+spacing&&box.y+box.height+1>y)cuts.push(vertical?[box.y-1,box.y+box.height+1]:[box.x-1,box.x+box.width+1]);
+        }
+        for(const object of objects.filter(o=>o.actualPage===pageIndex&&o.wrap)){
+          const box=objectBounds(object);
+          if(vertical?box.left<x+spacing&&box.right>x:box.top<y+spacing&&box.bottom>y)cuts.push(vertical?[box.top,box.bottom]:[box.left,box.right]);
+        }
+        intervals=subtractIntervals(vertical?m.top:m.left,vertical?height-m.bottom:width-m.right,cuts);
+        if(!adaptive)break;
+        let planned=cursor,required=spacing;
+        if(planned>=tokens.length)required=Math.max(required,emMm(project.baseStyle)/.92);
+        for(const [a,b] of intervals){
+          if(planned>=tokens.length)break;
+          if(tokens[planned].advance>b-a&&b-a<extent-.01)continue;
+          const end=lineEnd(tokens,planned,b-a,!vertical);
+          for(let i=planned;i<end;i++)required=Math.max(required,visual.ruling.autoSpacing?automaticRulingSpacing(tokens[i].style):emMm(tokens[i].style)/.92);
+          planned=end;
+          if(tokens[planned]?.text==='\n'||tokens[planned]?.text==='\f')break;
+        }
+        if(required<=spacing+.00001)break;
+        spacing=required;
       }
-      const intervals=subtractIntervals(vertical?m.top:m.left,vertical?height-m.bottom:width-m.right,cuts);
+      if(crossUsed+spacing>crossExtent+.001){
+        if(row===0)throw new Error('文字が本文領域に収まりません。文字サイズを小さくするか余白を広げてください。');
+        pageBreak=true;break;
+      }
+      page.rulingTracks!.push({x,y,extent,spacing});
       for(const [a,b] of intervals) {
         if(tokens[cursor] && forced.has(tokens[cursor].start) && page.lines.length>0) { pageBreak=true; break; }
         if(cursor>=tokens.length) {
@@ -90,6 +138,7 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
           trailing=false; break;
         }
         if(tokens[cursor].advance>b-a && b-a<extent-0.01) continue;
+        if(adaptive&&tokens[cursor].advance>extent+.001)throw new Error('文字が1行の本文幅に収まりません。1行の文字数を増やすか文字サイズを小さくしてください。');
         let end=lineEnd(tokens,cursor,b-a,!vertical);
         const line: LayoutLine={pageIndex,x:vertical?x:a,y:vertical?a:y,extent:b-a,spacing,start:tokens[cursor].start,end:tokens[end-1]?.end??tokens[cursor].start,tokens:tokens.slice(cursor,end)};
         if(tokens[end]?.text==='\n' || tokens[end]?.text==='\f') {
@@ -104,6 +153,13 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
         if(line.breakAfter==='\f') { pageBreak=true; trailing=cursor===tokens.length; break; }
         if(line.breakAfter==='\n') { trailing=cursor===tokens.length; break; }
       }
+      crossUsed+=spacing;
+    }
+    // Ruling is a page decoration, not a by-product of the available text runs.
+    // Keep blank bands and bands fully covered by wrapping objects too.
+    while(crossUsed+minimumSpacing<=crossExtent+.001){
+      page.rulingTracks!.push({x:vertical?width-m.right-crossUsed-minimumSpacing:m.left,y:vertical?m.top:m.top+crossUsed,extent,spacing:minimumSpacing});
+      crossUsed+=minimumSpacing;
     }
     page.end=page.lines.at(-1)?.end??page.start;
     pageIndex++;
@@ -112,9 +168,9 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
   return {width,height,pages,objects,warnings:[...warnings]};
 }
 
-function balance(project: Project, tokens: Token[], objects: PlacedObject[]): Layout {
+function balance(project: Project, tokens: Token[], objects: PlacedObject[], measure: Measure): Layout {
   const forced=new Set<number>();
-  let result=pass(project,tokens,objects,forced);
+  let result=pass(project,tokens,objects,forced,measure);
   if(!project.settings.orphanControl) return result;
   const text=bodyText(project);
   for(let iteration=0;iteration<8;iteration++) {
@@ -133,7 +189,7 @@ function balance(project: Project, tokens: Token[], objects: PlacedObject[]): La
       if(split!==undefined && !forced.has(split)) {forced.add(split);changed=true;}
     }
     if(!changed) break;
-    result=pass(project,tokens,objects,forced);
+    result=pass(project,tokens,objects,forced,measure);
   }
   return result;
 }
@@ -146,14 +202,14 @@ export function lineAt(layout: Layout, offset: number): LayoutLine {
 export function compose(project: Project, measure: Measure,adjustFlow?:(object:FloatingObject,basis:LayoutLine)=>FloatingObject): Layout {
   const tokens=tokenize(project,measure);
   const fixed=project.objects.filter(o=>o.anchorMode==='page').map(o=>({...o,actualX:o.x,actualY:o.y,actualPage:o.pageIndex}));
-  let result=balance(project,tokens,fixed);
+  let result=balance(project,tokens,fixed,measure);
   const placed:PlacedObject[]=[...fixed];
   // Stable source order breaks equal-anchor ties. Later objects see earlier
   // wrapping, while an object never chases the text displaced by itself.
   for(const original of project.objects.filter(o=>o.anchorMode==='flow').sort((a,b)=>a.anchorOffset-b.anchorOffset)){
     const line=lineAt(result,original.anchorOffset),o=adjustFlow?.(original,line)??original;
     placed.push({...o,actualX:line.x+o.x,actualY:line.y+o.y,actualPage:line.pageIndex});
-    if(o.wrap)result=balance(project,tokens,placed);
+    if(o.wrap)result=balance(project,tokens,placed,measure);
   }
   const objects=project.objects.map(o=>placed.find(p=>p.id===o.id)!);
   result.objects=objects;
@@ -171,11 +227,32 @@ export function rulingSegments(layout: Layout, pageIndex: number, vertical: bool
   const ruling=layout.pages[pageIndex].visual.ruling;
   if(!ruling.enabled) return [];
   const m=ruling.margins,s=ruling.spacingMm;
+  const artwork=resolveStationeryArtwork(layout.pages[pageIndex].visual.design);
+  const motifs=artwork&&(artwork.primary||illustratedTemplateIds.has(artwork.id))?decorationMotifLayout(artwork.id,layout.width,layout.height,vertical?'vertical':'horizontal',artwork.continuation).placements:[];
+  const decorationCuts=(cross:number):[number,number][]=>motifs.filter(b=>vertical?cross>=b.x-1&&cross<=b.x+b.width+1:cross>=b.y-1&&cross<=b.y+b.height+1).map(b=>vertical?[b.y-1,b.y+b.height+1]:[b.x-1,b.x+b.width+1]);
+  if(ruling.charactersPerLine!==undefined||ruling.autoSpacing){
+    const lines=layout.pages[pageIndex].rulingTracks??[...layout.pages[pageIndex].lines,...layout.pages[pageIndex].caretLines];
+    const unique=new Map<string,{x1:number;y1:number;x2:number;y2:number}>();
+    for(const line of lines){
+      const cross=vertical?line.x:line.y+line.spacing;
+      const cuts:[number,number][]=decorationCuts(cross);
+      for(const o of layout.objects.filter(o=>o.actualPage===pageIndex&&o.hideRuling)){
+        const b=objectBounds(o);
+        if(vertical?b.left<=cross&&b.right>=cross:b.top<=cross&&b.bottom>=cross)cuts.push(vertical?[b.top,b.bottom]:[b.left,b.right]);
+      }
+      const start=vertical?line.y:line.x;
+      for(const [a,b] of subtractIntervals(start,start+line.extent,cuts)){
+        const segment=vertical?{x1:cross,y1:a,x2:cross,y2:b}:{x1:a,y1:cross,x2:b,y2:cross};
+        unique.set(JSON.stringify(segment),segment);
+      }
+    }
+    return [...unique.values()];
+  }
   const tracks=Math.floor((vertical?layout.width-m.left-m.right:layout.height-m.top-m.bottom)/s+0.000001);
   const result: {x1:number;y1:number;x2:number;y2:number}[]=[];
   for(let row=0;row<tracks;row++) {
     const cross=vertical?layout.width-m.right-(row+1)*s:m.top+(row+1)*s;
-    const cuts: [number,number][]=[];
+    const cuts: [number,number][]=decorationCuts(cross);
     for(const o of layout.objects.filter(o=>o.actualPage===pageIndex && o.hideRuling)) {
       const b=objectBounds(o);
       if(vertical?b.left<=cross && b.right>=cross:b.top<=cross && b.bottom>=cross) cuts.push(vertical?[b.top,b.bottom]:[b.left,b.right]);

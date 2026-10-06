@@ -1,0 +1,38 @@
+async(page)=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ if(!await page.evaluate(()=>Boolean(window.__TAURI_INTERNALS__)))throw Error('Actual Tauri/WebView2 required');
+ const identifier=await page.evaluate(()=>window.__TAURI_INTERNALS__.invoke('plugin:app|identifier'));
+ if(identifier!=='jp.ytec.binsen-kobo.qa-save-20261002')throw Error('Dedicated QA application identifier required');
+ const body=()=>page.locator('.page-edit [data-token]').allTextContents().then(parts=>parts.join(''));
+ const startup=page.getByRole('dialog').filter({has:page.getByRole('heading',{name:'新規作成',exact:true})});await startup.waitFor();
+ if(await body()!=='')throw Error('Recovery opened without consent on process restart');
+ await startup.getByRole('button',{name:'閉じる',exact:true}).click();
+ await page.getByRole('button',{name:'前回の回復用データを開く',exact:true}).click();
+ await page.getByRole('status',{name:'回復用データ保存済み・ファイルは未保存',exact:true}).waitFor();
+ const expected='合成保存試験：最初の本文／Windows手動保存／Windows回復専用';
+ if(await body()!==expected)throw Error('Native process restart lost latest autosave');
+ await page.screenshot({path:'output/playwright/native-recovery-restarted-1280.png'});
+ await page.getByRole('tab',{name:'ヘルプ',exact:true}).click();
+ await page.getByRole('button',{name:'保存履歴',exact:true}).click();
+ const history=page.getByRole('dialog').filter({has:page.getByRole('heading',{name:'保存履歴',exact:true})});
+ await history.getByLabel('保護版の名前',{exact:true}).fill('Windows再起動の合成保護版');
+ await history.getByRole('button',{name:'現在を保護版にする',exact:true}).click();
+ await history.getByRole('button').filter({hasText:'★ Windows再起動の合成保護版'}).waitFor();
+ await history.getByRole('button',{name:'閉じる',exact:true}).first().click();
+ await page.getByRole('textbox',{name:'手紙の本文 1ページ',exact:true}).click();
+ await page.keyboard.press('Control+End');await page.keyboard.insertText('／履歴から戻す変更');
+ await page.getByRole('status',{name:'回復用データ保存済み・ファイルは未保存',exact:true}).waitFor();
+ await page.getByRole('button',{name:'保存履歴',exact:true}).click();
+ await history.getByRole('button').filter({hasText:'★ Windows再起動の合成保護版'}).click();
+ await history.getByRole('button',{name:'この状態へ復元する',exact:true}).click();
+ await history.waitFor({state:'hidden'});
+ await page.getByRole('status',{name:'回復用データ保存済み・ファイルは未保存',exact:true}).waitFor();
+ if(await body()!==expected)throw Error('Native history restoration lost content');
+ await page.getByRole('button',{name:'保存履歴',exact:true}).click();
+ await history.getByRole('button').filter({hasText:'★ 復元前の状態'}).waitFor();
+ await page.screenshot({path:'output/playwright/native-recovery-history-1280.png'});
+ await history.getByRole('button',{name:'閉じる',exact:true}).first().click();
+ if(errors.length)throw Error(errors.join(';'));
+ const result={identifier,explicitRecoveryOnly:true,latestBodyLoaded:true,historyRestore:true,preRestoreProtected:true,body:await body(),pageErrors:errors};
+ await page.evaluate(value=>{window.__letterierNativeRecoveryVerify=value;},result);return result;
+}

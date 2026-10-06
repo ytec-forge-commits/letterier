@@ -1,0 +1,40 @@
+async(page)=>{
+ if(new URL(page.url()).origin!=='http://127.0.0.1:1436')throw Error('Dedicated local manual preview required');
+ const storeCapture=new URL(page.url()).searchParams.get('capture')==='store-2.0.0';
+ await page.setViewportSize(storeCapture?{width:1536,height:960}:{width:1280,height:800});
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const shot=async name=>{await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`output/playwright/${storeCapture?'store-2':'manual-2'}-${name}.png`});};
+ const startup=page.getByRole('dialog',{name:'新規作成',exact:true});
+ if(!await startup.count()){await page.getByRole('tab',{name:'ホーム',exact:true}).click();await page.getByRole('button',{name:'新規作成',exact:true}).click();}
+ await startup.waitFor();
+ await startup.getByRole('button',{name:/桜の便り/}).click();await shot('ja-stationery');
+ await startup.getByRole('button',{name:'この便箋で新しい手紙',exact:true}).click();
+ const body=page.getByRole('textbox',{name:'手紙の本文 1ページ',exact:true});
+ if(await body.locator('[data-token]').count())throw Error('Fresh synthetic document required');
+ await body.fill('拝啓\n桜の花がやわらかな春風に揺れる頃となりました。\n先日は温かいお心遣いをいただき、ありがとうございました。\n花便りを楽しみながら、またお会いできる日を心待ちにしております。\n敬具');
+ await page.getByRole('tab',{name:'ホーム',exact:true}).click();await shot('ja-horizontal');
+ await page.getByRole('tab',{name:'レイアウト',exact:true}).click();await shot('ja-layout');
+ await page.getByLabel('書字方向',{exact:true}).selectOption('vertical');await shot('ja-vertical');await page.getByLabel('書字方向',{exact:true}).selectOption('horizontal');
+ await page.getByRole('tab',{name:'挿入',exact:true}).click();await page.getByRole('button',{name:'文字箱',exact:true}).click();
+ await page.getByLabel('文字箱の本文',{exact:true}).fill('追伸\n季節の変わり目ですので、どうぞご自愛ください。');
+ await page.getByLabel('文字箱の書字方向',{exact:true}).selectOption('vertical');
+ await page.getByLabel('配置方法',{exact:true}).selectOption('page');
+ for(const [label,value]of [['横位置（mm）','158'],['縦位置（mm）','55'],['幅（mm）','25'],['高さ（mm）','95']])await page.getByLabel(label,{exact:true}).fill(value);
+ await shot('ja-textbox');
+ await page.getByRole('tab',{name:'ヘルプ',exact:true}).click();await page.getByRole('button',{name:'設定・使い方',exact:true}).click();
+ await page.getByLabel('表示言語',{exact:true}).selectOption('en');await shot('en-settings');
+ await page.getByRole('dialog',{name:'Settings & Help',exact:true}).getByRole('button',{name:'Close',exact:true}).click();
+ await page.getByRole('tab',{name:'Home',exact:true}).click();await page.getByRole('tabpanel',{name:'Home',exact:true}).getByRole('button',{name:'New letter',exact:true}).click();
+ const picker=page.getByRole('dialog',{name:'New letter',exact:true});await picker.getByRole('button',{name:/Cherry Blossom Letter/}).click();await shot('en-stationery');
+ await picker.getByRole('button',{name:'Start a new letter with this stationery',exact:true}).click();
+ await page.getByRole('dialog',{name:/Save changes/}).getByRole('button',{name:"Don't save",exact:true}).click();
+ const englishBody=page.getByRole('textbox',{name:'Letter body, page 1',exact:true});await englishBody.fill('Dear my friend,\n\nThe cherry blossoms are opening in the gentle spring breeze. Thank you for your thoughtful letter.\n\nI hope we can enjoy the blossoms together soon.\n\nWarm regards,\nY-TEC');
+ await page.getByRole('tab',{name:'Home',exact:true}).click();await shot('en-horizontal');
+ await page.getByRole('tab',{name:'Layout',exact:true}).click();await shot('en-layout');
+ await page.getByRole('tab',{name:'Insert',exact:true}).click();await page.getByRole('button',{name:'Text box',exact:true}).click();
+ await page.getByLabel('Text box content',{exact:true}).fill('A small note\nWritten independently from the body.');
+ await page.getByLabel('Text box writing direction',{exact:true}).selectOption('horizontal');await page.getByLabel('Placement',{exact:true}).selectOption('page');
+ for(const[label,value]of [['Horizontal position (mm)','132'],['Vertical position (mm)','128'],['Width (mm)','55'],['Height (mm)','28']])await page.getByLabel(label,{exact:true}).fill(value);
+ await shot('en-textbox');
+ if(errors.length)throw Error(errors.join(';'));return {version:'2.0.0',synthetic:true,capture:storeCapture?'store':'manual',screenshots:10,pageErrors:errors};
+}

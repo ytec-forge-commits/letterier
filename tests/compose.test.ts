@@ -3,7 +3,7 @@ import { newProject, replaceRange, type FloatingObject } from '../src/core/model
 import { compose, tokenize, subtractIntervals, rulingSegments, type Measure } from '../src/core/compose';
 const measure: Measure = () => 5;
 function tiny(text: string, vertical=false) {
-  const p=replaceRange(newProject(),0,0,text);
+  const p=replaceRange(newProject({automaticRuling:false}),0,0,text);
   p.settings.writingMode=vertical?'vertical':'horizontal'; p.settings.orphanControl=false;
   p.pages[0].ruling={...p.pages[0].ruling,spacingMm:10,margins:vertical?{top:10,bottom:272,left:170,right:20}:{top:10,bottom:267,left:20,right:175}};
   p.continuation=structuredClone(p.pages[0]);

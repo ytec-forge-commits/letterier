@@ -1,6 +1,7 @@
 import type {WritingMode} from '../core/model';
 import {decorationMotifLayout} from '../core/stationery-layout';
 import {templates} from '../core/templates';
+import {resolveStationeryArtwork} from '../core/stationery-artwork';
 export {decorationMotifLayout} from '../core/stationery-layout';
 export const generatedArt:Record<string,string>={
   ichimatsu:'ichimatsu',sakura:'sakura',nanohana:'nanohana',asagao:'asagao',goldfish:'goldfish',momiji:'momiji',
@@ -52,12 +53,14 @@ function Motif({id,paper}:{id:string;paper:string}){
   }
 }
 export function PaperDecoration({design,width,height,writingMode}:{design:string;width:number;height:number;writingMode:WritingMode}){
-  const id=design.replace(/-(first|continuation)$/,''),continuation=design.endsWith('-continuation'),template=templates.find(t=>t.id===id);
+  const artwork=resolveStationeryArtwork(design);
+  if(!artwork)return null;
+  const {id,continuation}=artwork,template=templates.find(t=>t.id===id);
   if(!template||id==='blank')return null;
   const vertical=writingMode==='vertical';
-  const art=generatedArt[id];
+  const art=artwork.primary??generatedArt[id];
   const artPath=templateArtPath(id,art);
-  const companionArtPath=templateArtPath(id,generatedCompanionArt[id]);
+  const companionArtPath=templateArtPath(id,artwork.companion??generatedCompanionArt[id]);
   const layout=decorationMotifLayout(id,width,height,writingMode,continuation);
   return <svg className="paper-decoration" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
     {artPath&&layout.placements.map((placement,index)=><image key={`${placement.art}-${index}`} href={placement.art==='primary'?artPath:companionArtPath} x={placement.x} y={placement.y} width={placement.width} height={placement.height} opacity={placement.opacity} preserveAspectRatio="xMidYMid meet" transform={placement.rotation?`rotate(${placement.rotation} ${placement.x+placement.width/2} ${placement.y+placement.height/2})`:undefined}/>)}

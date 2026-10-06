@@ -4,7 +4,6 @@ import html
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -24,17 +23,9 @@ FONT_BOLD = ROOT / "public" / "fonts" / "kleeone" / "KleeOne-SemiBold.ttf"
 def inline(text: str) -> str:
     text = text.replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-")
     escaped = html.escape(text)
-    def link(match):
-        label, target = match.groups()
-        parsed = urlsplit(html.unescape(target))
-        if parsed.scheme in {"https", "http"} and parsed.netloc:
-            return f'<link href="{target}" color="#2b614d">{label}</link>'
-        filename = Path(parsed.path).name
-        return f"{label} ({html.escape(filename)})" if filename else label
-
-    escaped = re.sub(r"\[([^]]+)]\(([^)]+)\)", link, escaped)
+    escaped = re.sub(r"\[([^]]+)]\(([^)]+)\)", r'<link href="\2" color="#2b614d">\1</link>', escaped)
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", escaped)
-    escaped = re.sub(r"`([^`]+)`", lambda match: f'<font name="{"Courier" if html.unescape(match[1]).isascii() else "Klee"}">{match[1]}</font>', escaped)
+    escaped = re.sub(r"`([^`]+)`", r'<font name="Courier">\1</font>', escaped)
     return escaped
 
 
@@ -42,14 +33,14 @@ def add_page_number(canvas, doc):
     canvas.saveState()
     canvas.setFont("Klee", 8)
     canvas.setFillColor(colors.HexColor("#5c6f66"))
-    canvas.drawString(18 * mm, 10 * mm, "Letterier 1.0.4")
+    canvas.drawString(18 * mm, 10 * mm, "Letterier 2.0.0")
     canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, str(doc.page))
     canvas.restoreState()
 
 
 def build(language: str):
     source = ROOT / "docs" / "manual" / language / "README.md"
-    destination = OUTPUT / ("Letterier-Manual-ja-1.0.4.pdf" if language == "ja" else "Letterier-Manual-en-1.0.4.pdf")
+    destination = OUTPUT / ("Letterier-Manual-ja-2.0.0.pdf" if language == "ja" else "Letterier-Manual-en-2.0.0.pdf")
     lines = source.read_text(encoding="utf-8").splitlines()
     styles = getSampleStyleSheet()
     body = ParagraphStyle("Body", parent=styles["BodyText"], fontName="Klee", fontSize=10.2, leading=17, textColor=colors.HexColor("#263a31"), spaceAfter=7)
@@ -123,13 +114,13 @@ def build(language: str):
     flush()
 
     story.append(PageBreak())
-    closing = "© 2026 Y-TEC / Documentation terms: LICENSE_EXCEPTIONS.md" if language == "en" else "© 2026 Y-TEC / 文書の利用条件: LICENSE_EXCEPTIONS.md"
+    closing = "© 2026 Y-TEC / Documentation: CC BY 4.0" if language == "en" else "© 2026 Y-TEC / 文書: CC BY 4.0"
     story.append(Spacer(1, 90 * mm))
     story.append(Paragraph("Letterier", title))
     story.append(Paragraph(closing, meta))
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    document = SimpleDocTemplate(str(destination), pagesize=A4, rightMargin=18 * mm, leftMargin=18 * mm, topMargin=16 * mm, bottomMargin=17 * mm, title="Letterier 1.0.4 User Manual" if language == "en" else "レタリエ 1.0.4 操作マニュアル", author="Y-TEC", creator="Y-TEC")
+    document = SimpleDocTemplate(str(destination), pagesize=A4, rightMargin=18 * mm, leftMargin=18 * mm, topMargin=16 * mm, bottomMargin=17 * mm, title="Letterier User Manual" if language == "en" else "レタリエ 操作マニュアル", author="Y-TEC")
     document.build(story, onFirstPage=add_page_number, onLaterPages=add_page_number)
     return destination
 
