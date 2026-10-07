@@ -1,5 +1,21 @@
 # Letterier Microsoft Store submission draft
 
+## 2.0.1 current local preparation - 2026-10-07
+
+This section records the user's explicit request to prepare the 2.0.1 replacement and submission materials locally for the next GitHub, Forge, Store, and Vector stages. It is local evidence only: no public release, Store action, Vector action, upload, or submission was performed. The package candidate name is `LetterAtelier-2.0.1.0-x64-unsigned.msix`; its final hash belongs in private final evidence after generation and is intentionally not recorded here. Earlier 2.0.0 and older artifacts remain historical evidence and are not reused as 2.0.1 evidence.
+
+Identity, pricing, markets, age rating, privacy declarations, schema, and license policy are unchanged. Publisher and other protected identity values are not repeated in this current preparation section.
+
+## 2.0.0 update preparation - 2026-10-02
+
+The human requested the 2.0.0 update and has supplied the existing Chrome management tab. The product is currently available in Microsoft Store. Package identity name, Publisher, and PublisherDisplayName were rechecked in Partner Center and match the identity recorded below. No update draft, upload, or certification submission has been performed during this preparation.
+
+The first local 2.0.0.0 MSIX build succeeded, but inspection found outdated 1.0.4 bundled README text. It is retained as evidence, not an upload candidate. After updating the Japanese and English bundled README and certification flow, rebuilding and repackaging succeeded. The current unsigned candidate is `output/msix-20261002-184136/LetterAtelier-2.0.0.0-x64-unsigned.msix`, SHA-256 `9375F82DEF3F3D440D37FE527FAC1AF1B7611AA4DC6F8FD4952F4322E10526AE`. Its identity, EXE hash, required payloads and README equality were checked read-only. This is not evidence of installation, WACK or certification success. The September package path, hashes, WACK results, and initial-release proposals below are historical evidence only and must not be reused as 2.0.0 completion evidence.
+
+Current listing sources describe personal templates, background dragging, line length and automatic rules, character spacing, default body size, zoom, clearer controls, outside-click dismissal, print-first output, and saved window size. Screenshots and the final package must match the verified release before upload. Preserve existing pricing, markets, age ratings, identity, and privacy declarations unless a specific change is approved. New legal agreements or authentication require user handoff/confirmation as applicable.
+
+Ten new screenshots (five per language) were captured from the actual 2.0.0 frontend using synthetic letters in an isolated browser. All are 1536×960 PNG, below 50 MB, and were visually reviewed. See [screenshots-2.0.0.md](screenshots-2.0.0.md). They are locally prepared candidates, not uploaded or native Windows installation evidence. Existing listing images remain untouched.
+
 Prepared: 2026-09-14 (JST)
 
 This is a local preparation note. It does not authorize starting or saving a Partner Center submission, uploading the package, or submitting it for certification.

@@ -1,8 +1,8 @@
 # Letterier User Manual
 
-For version 2.0.0 / Windows 10 and 11, 64-bit
+For version 2.0.1 / Windows 10 and 11, 64-bit
 
-This manual describes the 2.0.0 candidate, which is being validated and prepared for distribution. Publication and Store submission have not yet occurred. The signed/Store distribution instructions below do not mean this candidate is signed or publicly available. WebView2 Runtime is required.
+This manual covers Letterier 2.0.1. Check the applicable instructions for the current distribution, publication, and review status. WebView2 Runtime is required.
 
 Letterier lets you write directly on stationery, add photos or text boxes, and finish your letter as a PDF or a printed page. Letters and images stay on your computer, and ordinary use does not require an internet connection.
 
@@ -16,7 +16,7 @@ Letterier lets you write directly on stationery, add photos or text boxes, and f
 - Product page: [Letterier on Y-TEC Forge](https://ytec.cloudfree.jp/forge/en/projects/letterier/)
 - Source code: [GitHub](https://github.com/ytec-forge-commits/letterier)
 
-For the portable ZIP edition, extract the ZIP before launching `Letterier.exe` from the extracted folder. Windows may show a warning because this edition uses a self-signed certificate. For the standard installer, run `Letterier-2.0.0-windows-x64-self-signed-setup.exe` and follow the prompts. For the Microsoft Store edition, select **Install** in Microsoft Store. The portable ZIP does not include WebView2 Runtime; install the official Microsoft Runtime if it is not already present.
+For the portable ZIP edition, extract the ZIP before launching `Letterier.exe` from the extracted folder. Windows may show a warning because this edition uses a self-signed certificate. For the standard installer, run `Letterier-2.0.1-windows-x64-self-signed-setup.exe` and follow the prompts. For the Microsoft Store edition, select **Install** in Microsoft Store. The portable ZIP does not include WebView2 Runtime; install the official Microsoft Runtime if it is not already present.
 
 To uninstall the portable ZIP edition, close Letterier and delete its extracted folder. To uninstall the standard installer or Microsoft Store edition, open **Windows Settings → Apps → Installed apps**, open the menu for **Letterier**, and select **Uninstall**. Your `.binsen`, `.binsenbak`, PDF, and image files are not deleted automatically. Check them first and delete only files you no longer need.
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import sys
 from pathlib import Path
@@ -18,29 +19,40 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "output" / "pdf"
 FONT = ROOT / "public" / "fonts" / "kleeone" / "KleeOne-Regular.ttf"
 FONT_BOLD = ROOT / "public" / "fonts" / "kleeone" / "KleeOne-SemiBold.ttf"
+VERSION = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["version"]
 
 
 def inline(text: str) -> str:
     text = text.replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-")
     escaped = html.escape(text)
-    escaped = re.sub(r"\[([^]]+)]\(([^)]+)\)", r'<link href="\2" color="#2b614d">\1</link>', escaped)
+    def link(match: re.Match[str]) -> str:
+        label, target = match.group(1), match.group(2)
+        if re.match(r"https?://", target, re.IGNORECASE):
+            return f'<link href="{target}" color="#2b614d">{label}</link>'
+        return label
+
+    escaped = re.sub(r"\[([^]]+)]\(([^)]+)\)", link, escaped)
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", escaped)
-    escaped = re.sub(r"`([^`]+)`", r'<font name="Courier">\1</font>', escaped)
+    escaped = re.sub(r"`([^`]+)`", r"\1", escaped)
     return escaped
+
+
+def closing_text(language: str) -> str:
+    return "© 2026 Y-TEC / All rights reserved."
 
 
 def add_page_number(canvas, doc):
     canvas.saveState()
     canvas.setFont("Klee", 8)
     canvas.setFillColor(colors.HexColor("#5c6f66"))
-    canvas.drawString(18 * mm, 10 * mm, "Letterier 2.0.0")
+    canvas.drawString(18 * mm, 10 * mm, f"Letterier {VERSION}")
     canvas.drawRightString(A4[0] - 18 * mm, 10 * mm, str(doc.page))
     canvas.restoreState()
 
 
 def build(language: str):
     source = ROOT / "docs" / "manual" / language / "README.md"
-    destination = OUTPUT / ("Letterier-Manual-ja-2.0.0.pdf" if language == "ja" else "Letterier-Manual-en-2.0.0.pdf")
+    destination = OUTPUT / f"Letterier-Manual-{language}-{VERSION}.pdf"
     lines = source.read_text(encoding="utf-8").splitlines()
     styles = getSampleStyleSheet()
     body = ParagraphStyle("Body", parent=styles["BodyText"], fontName="Klee", fontSize=10.2, leading=17, textColor=colors.HexColor("#263a31"), spaceAfter=7)
@@ -114,7 +126,7 @@ def build(language: str):
     flush()
 
     story.append(PageBreak())
-    closing = "© 2026 Y-TEC / Documentation: CC BY 4.0" if language == "en" else "© 2026 Y-TEC / 文書: CC BY 4.0"
+    closing = closing_text(language)
     story.append(Spacer(1, 90 * mm))
     story.append(Paragraph("Letterier", title))
     story.append(Paragraph(closing, meta))

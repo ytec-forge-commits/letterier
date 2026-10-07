@@ -4,7 +4,7 @@ import { graphemes } from '../core/layout';
 import { type Layout } from '../core/compose';
 import { LineContent, PageArtwork } from './Paper';
 import { ObjectLayer } from './ObjectLayer';
-import {moveBlockCaret,pickCaretCandidate} from '../core/caret';
+import {moveBlockCaret,moveInlineCaret,pickCaretCandidate} from '../core/caret';
 
 export interface TextSelection { start:number; end:number }
 interface Props { uiLanguage:'ja'|'en';currentStyle:TextStyle;project:Project;layout:Layout;zoom:number;selection:TextSelection;caretRequest:number;onSelection:(value:TextSelection)=>void;onInsert:(start:number,end:number,text:string)=>void;onHistory:(redo:boolean)=>void;onFormat:(style:Partial<TextStyle>)=>void;onPage:(page:number)=>void;selectedObject?:string|null;onSelectObject?:(id:string)=>void;onObjectPreview?:(id:string,patch:Partial<FloatingObject>|null)=>void;onObjectChange?:(id:string,patch:Partial<FloatingObject>)=>void;onObjectDelete?:(id:string)=>void }
@@ -119,7 +119,7 @@ export function EditorCanvas(props:Props) {
       const blockForward=e.key===(vertical?'ArrowLeft':'ArrowDown'),blockBackward=e.key===(vertical?'ArrowRight':'ArrowUp');
       if((blockForward||blockBackward)&&active){const result=moveBlockCaret(props.layout,vertical,pageIndex,Number(active.dataset.lineStart),focus,blockForward?1:-1,preferredInline.current);preferredInline.current=result.coordinate;move(result.offset,result.pageIndex);return;}
       const forward=e.key===(vertical?'ArrowDown':'ArrowRight'),back=e.key===(vertical?'ArrowUp':'ArrowLeft');
-      if(forward||back){preferredInline.current=undefined;if(!e.shiftKey&&anchor!==focus){move(forward?Math.max(anchor,focus):Math.min(anchor,focus));return;}const part=forward?graphemes(text.slice(focus))[0]??'':graphemes(text.slice(0,focus)).at(-1)??'';move(focus+(forward?part.length:-part.length));return;}
+      if(forward||back){preferredInline.current=undefined;if(!e.shiftKey&&anchor!==focus){move(forward?Math.max(anchor,focus):Math.min(anchor,focus));return;}move(moveInlineCaret(text,focus,forward?1:-1));return;}
     }
     if(e.key==='Home'||e.key==='End'){preferredInline.current=undefined;const end=e.key==='End';move(e.ctrlKey?(end?text.length:0):Number(end?(Array.from(active?.querySelectorAll<HTMLElement>('[data-token]')??[]).at(-1)?.dataset.end??active?.dataset.lineEnd):active?.dataset.lineStart));}
   };

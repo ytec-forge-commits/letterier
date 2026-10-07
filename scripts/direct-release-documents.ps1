@@ -6,7 +6,7 @@ function Copy-LetterierDirectDocuments {
     foreach ($name in @('SAVE-RECOVERY-VALIDATION.md','NATIVE-OUTPUT-VALIDATION.md','PERFORMANCE-VALIDATION.md','PALETTE-VALIDATION.md','SECURITY-REVIEW.md')) {
         Copy-Item -LiteralPath (Join-Path $ProjectRoot ('docs/'+$name)) -Destination (Join-Path $Stage 'docs') -ErrorAction Stop
     }
-    foreach ($name in @('README.md','README-VECTOR.txt','release-2.0.0-checklist.md')) {
+    foreach ($name in @('README.md','README-VECTOR.txt')) {
         Copy-Item -LiteralPath (Join-Path $ProjectRoot ('distribution/'+$name)) -Destination (Join-Path $Stage 'distribution') -ErrorAction Stop
     }
     Copy-Item -LiteralPath (Join-Path $ProjectRoot 'distribution/README-VECTOR.txt') -Destination $Stage -ErrorAction Stop
@@ -37,7 +37,15 @@ function Assert-LetterierDirectDocuments {
     if (@($names | Where-Object { $_ -match '(?i)(^|/)(\.env[^/]*|[^/]+\.(pfx|p12|key|pem|jks|binsen|binsenbak)|Cookies(?:[.-][^/]*)?|id_(rsa|dsa|ecdsa|ed25519)|draft-[^/]+)$' }).Count) {
         throw 'Unexpected sensitive or saved-document filename in direct package.'
     }
-    foreach ($relative in @('README.md','README.en.md','docs/manual/ja/README.md','docs/manual/en/README.md')) {
+    foreach ($relative in @(
+        'README.md',
+        'README.en.md',
+        'docs/manual/ja/README.md',
+        'docs/manual/en/README.md',
+        'legal/README.md',
+        'legal/README.en.md',
+        'distribution/README.md'
+    )) {
         $content=Get-Content -LiteralPath (Join-Path $root $relative) -Raw -Encoding utf8 -ErrorAction Stop
         foreach ($match in [regex]::Matches($content,'\]\(([^)]+)\)')) {
             $target=$match.Groups[1].Value

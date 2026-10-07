@@ -1,8 +1,8 @@
 # レタリエ 操作マニュアル
 
-対象バージョン: 2.0.0 / Windows 10・11（64ビット）
+対象バージョン: 2.0.1 / Windows 10・11（64ビット）
 
-2.0.0候補版の説明書です。現在は検証・配布準備中で、公開・Store提出はまだ行っていません。以下の自己署名版・Store版の案内は正式配布時の案内であり、候補版の署名・公開を意味しません。WebView2 Runtimeが必要です。
+この説明書はレタリエ2.0.1を対象とします。配布形態や公開・審査の状態は、実際の案内をご確認ください。WebView2 Runtimeが必要です。
 
 レタリエは、便箋を選び、紙の上へ直接文章を書き、写真や文字を添えて印刷できる手紙作成アプリです。手紙と画像はお使いのパソコン内で扱われ、通常の利用にインターネット接続は必要ありません。
 
@@ -16,7 +16,7 @@
 - 公式紹介ページ: [Y-TEC Forge レタリエ](https://ytec.cloudfree.jp/forge/projects/letterier/)
 - ソースコード: [GitHub](https://github.com/ytec-forge-commits/letterier)
 
-ポータブルZIP版はZIPを展開してから、フォルダー内の `Letterier.exe` を起動します。自己署名版のため、初回にWindowsの警告が表示されることがあります。通常インストーラー版は `Letterier-2.0.0-windows-x64-self-signed-setup.exe` を実行し、画面の案内に従います。Microsoft Store版はStoreの「インストール」を選びます。ポータブルZIP版にWebView2 Runtimeは同梱していません。未導入の場合はMicrosoft公式のRuntimeを導入してください。
+ポータブルZIP版はZIPを展開してから、フォルダー内の `Letterier.exe` を起動します。自己署名版のため、初回にWindowsの警告が表示されることがあります。通常インストーラー版は `Letterier-2.0.1-windows-x64-self-signed-setup.exe` を実行し、画面の案内に従います。Microsoft Store版はStoreの「インストール」を選びます。ポータブルZIP版にWebView2 Runtimeは同梱していません。未導入の場合はMicrosoft公式のRuntimeを導入してください。
 
 アンインストールは、ポータブルZIP版ではレタリエを終了して展開先フォルダーを削除します。通常インストーラー版とMicrosoft Store版では、Windowsの「設定 → アプリ → インストールされているアプリ」で「レタリエ」のメニューを開き、「アンインストール」を選びます。利用者が保存した `.binsen`、`.binsenbak`、PDF、画像は自動では削除されません。必要なファイルを確認してから、不要なものだけを利用者自身で削除してください。
 

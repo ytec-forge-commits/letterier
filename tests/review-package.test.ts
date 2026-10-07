@@ -6,8 +6,9 @@ import {zipSync, strToU8} from 'fflate';
 
 const roots: string[] = [];
 afterEach(() => { for (const root of roots.splice(0)) rmSync(root, {recursive: true, force: true}); });
+const currentVersion = JSON.parse(readFileSync('package.json', 'utf8')).version as string;
 
-function fixture(version = '2.0.0') {
+function fixture(version = currentVersion) {
   const required = ['レタリエ.exe', 'REVIEW-STATUS.txt', 'README.md', 'README.en.md', 'LICENSE', 'NOTICE',
     'THIRD_PARTY_NOTICES.md', 'ASSETS_LICENSE.md', 'ASSET_PROVENANCE.md', 'CODE_SIGNING_POLICY.md', 'IMAGE-FORMATS.md',
     'BRAND_POLICY.md', 'LICENSE_EXCEPTIONS.md', 'PRIVACY.md', 'distribution/README-VECTOR.txt',
@@ -50,6 +51,12 @@ test('旧版は明示した期待バージョンの場合だけ受け入れる',
   const result = run(entries, '1.0.4'); expect(result.status, result.stderr).toBe(0);
 }, 40000);
 
+test('旧2.0.0 fixtureは現行版の既定期待値では受け入れない', () => {
+  const result = run(fixture('2.0.0').entries);
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain('Invalid review entry path');
+}, 20000);
+
 test('必須のライセンスファイルが欠落したレビューZIPを拒否する', () => {
   const {root, entries} = fixture(); delete entries[root + 'LICENSE'];
   const result = run(entries); expect(result.status).not.toBe(0);
@@ -57,7 +64,7 @@ test('必須のライセンスファイルが欠落したレビューZIPを拒�
 }, 20000);
 
 test('旧画面が同梱されていても現在版の画面欠落を成功扱いしない', () => {
-  const {root, entries} = fixture(); delete entries[root + 'docs/manual/images/ja-vertical-2.0.0.png'];
+  const {root, entries} = fixture(); delete entries[root + `docs/manual/images/ja-vertical-${currentVersion}.png`];
   for (const [name, bytes] of Object.entries(fixture('1.0.4').entries)) {
     if (name.endsWith('.png')) entries[root + name.split('/').slice(1).join('/')] = bytes;
   }
@@ -74,7 +81,7 @@ test('同梱説明書のリンク切れを拒否する', () => {
 
 test('同梱説明書の正しい相対画像リンクを受け入れる', () => {
   const {root, entries} = fixture();
-  entries[root + 'docs/manual/ja/README.md'] = strToU8('![Screen](../images/ja-horizontal-2.0.0.png)');
+  entries[root + 'docs/manual/ja/README.md'] = strToU8(`![Screen](../images/ja-horizontal-${currentVersion}.png)`);
   const result = run(entries); expect(result.status, result.stderr).toBe(0);
 }, 20000);
 
@@ -86,14 +93,14 @@ test('秘密鍵ファイル名を含むレビューZIPを拒否する', () => {
 
 test('現在版の画面が八枚あっても必要な画面種類の欠落を拒否する', () => {
   const {root, entries} = fixture();
-  const name = root + 'docs/manual/images/ja-vertical-2.0.0.png';
-  entries[root + 'docs/manual/images/ja-unrelated-2.0.0.png'] = entries[name]; delete entries[name];
+  const name = root + `docs/manual/images/ja-vertical-${currentVersion}.png`;
+  entries[root + `docs/manual/images/ja-unrelated-${currentVersion}.png`] = entries[name]; delete entries[name];
   const result = run(entries); expect(result.status).not.toBe(0);
   expect(result.stderr).toContain('Expected eight latest manual screenshots');
 }, 20000);
 
 test('画面ファイルのPNGヘッダーが不正なら拒否する', () => {
-  const {root, entries} = fixture(); entries[root + 'docs/manual/images/ja-vertical-2.0.0.png'] = new Uint8Array([0]);
+  const {root, entries} = fixture(); entries[root + `docs/manual/images/ja-vertical-${currentVersion}.png`] = new Uint8Array([0]);
   const result = run(entries); expect(result.status).not.toBe(0);
   expect(result.stderr).toContain('Invalid manual PNG signature');
 }, 20000);
