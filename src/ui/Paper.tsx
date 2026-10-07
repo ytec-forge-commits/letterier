@@ -32,7 +32,7 @@ export function LineContent({line,vertical,index}:{line:LayoutLine;vertical:bool
   const style: CSSProperties={position:'absolute',left:`${line.x}mm`,top:`${line.y}mm`,width:`${vertical?line.spacing:line.extent}mm`,height:`${vertical?line.extent:line.spacing}mm`,lineHeight:`${line.spacing}mm`,writingMode:vertical?'vertical-rl':'horizontal-tb',textOrientation:vertical?'upright':undefined};
   return <span className="body-line" data-line-index={index} data-line-start={line.start} data-line-end={line.end} style={style}>
     {line.tokens.map(token=><span key={token.start} data-token="" data-offset={token.start} data-end={token.end} style={{...textCss(token.style),...(token.style.letterSpacingPt?{letterSpacing:'normal',marginInlineEnd:`${token.style.letterSpacingPt}pt`}:{}),textCombineUpright:token.tcy?'all':'none',...(vertical&&!token.tcy&&/^[()[\]{}<>]$/.test(token.text)?{textOrientation:'mixed' as const}:{})}}>{token.text}</span>)}
+    {!line.tokens.length&&<span data-offset={line.start} data-end={line.start} data-empty="">{'\u200b'}</span>}
     {line.breakAfter&&<span data-offset={line.end-(line.breakText??line.breakAfter).length} data-end={line.end} data-separator={line.breakAfter==='\f'?'page':'paragraph'} className="text-separator">{line.breakText??line.breakAfter}</span>}
-    {!line.tokens.length&&!line.breakAfter&&<span data-offset={line.start} data-end={line.end} data-empty="">{'\u200b'}</span>}
   </span>;
 }

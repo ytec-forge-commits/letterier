@@ -50,7 +50,7 @@ class ManualPdfTests(unittest.TestCase):
             text = "\n".join(page.extract_text() or "" for page in reader.pages)
             self.assertNotIn("CC BY 4.0", text)
             self.assertIn("Y-TEC", text)
-            self.assertIn("本体コードのライセンス" if language == "ja" else "Application code license", text)
+            self.assertIn("ソフトウェアライセンス" if language == "ja" else "Software license:", text)
 
     def test_distribution_legal_links_resolve_within_legal_folder(self):
         legal = ROOT / "public" / "legal"
@@ -79,6 +79,20 @@ class ManualPdfTests(unittest.TestCase):
                     continue
                 resolved = (stage / "manual" / language / parsed.path).resolve()
                 self.assertTrue(resolved.is_relative_to(stage.resolve()), msg=f"{language}: {target}")
+
+    def test_japanese_inline_code_keeps_the_body_font(self):
+        rendered = MANUAL.inline("`名前を付けて保存`")
+        self.assertIn("名前を付けて保存", rendered)
+        self.assertNotIn('font name="Courier"', rendered)
+
+    def test_relative_markdown_links_remain_readable_without_pdf_uri(self):
+        rendered = MANUAL.inline("[Image formats](../../../IMAGE-FORMATS.md)")
+        self.assertIn("Image formats", rendered)
+        self.assertNotIn("<link ", rendered)
+
+    def test_manual_closing_uses_the_existing_rights_policy(self):
+        self.assertEqual(MANUAL.closing_text("ja"), "© 2026 Y-TEC / All rights reserved.")
+        self.assertEqual(MANUAL.closing_text("en"), "© 2026 Y-TEC / All rights reserved.")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,12 @@
 param(
     [switch]$CompleteExistingBuild,
+    [string]$CandidateSuffix,
     [string]$ExpectedBinarySHA256,
     [string]$ExpectedInstallerSHA256
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'code-signing.ps1')
+. (Join-Path $PSScriptRoot 'direct-release-output.ps1')
 . (Join-Path $PSScriptRoot 'signing-host.ps1')
 . (Join-Path $PSScriptRoot 'direct-release-documents.ps1')
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -12,13 +14,12 @@ $package = Get-Content -Raw -LiteralPath (Join-Path $projectRoot 'package.json')
 $version = [string]$package.version
 $tauriConfig = Get-Content -Raw -Encoding utf8 -LiteralPath (Join-Path $projectRoot 'src-tauri\tauri.conf.json') | ConvertFrom-Json
 $productName = [string]$tauriConfig.productName
-$outputRoot = Join-Path $projectRoot "output\release-$version"
+$outputRoot = Get-LetterierDirectReleaseOutputPath -OutputRoot (Join-Path $projectRoot 'output') -Version $version -CandidateSuffix $CandidateSuffix -AllowExisting:$CompleteExistingBuild
 if ($CompleteExistingBuild) {
     # A failed attempt is retained; complete the exact observed build into a
     # fresh output rather than rebuilding, overwriting or deleting evidence.
-    $outputRoot = Join-Path $projectRoot ("output\release-$version-completed-" + [Guid]::NewGuid().ToString('N'))
+    $outputRoot = $outputRoot + '-completed-' + [Guid]::NewGuid().ToString('N')
 }
-if (Test-Path -LiteralPath $outputRoot) { throw "Refusing to overwrite an existing release candidate: $outputRoot" }
 $temporaryRoot = Join-Path $projectRoot ('.local\direct-release-' + [Guid]::NewGuid().ToString('N'))
 $configPath = Join-Path $temporaryRoot 'tauri-signing.json'
 $stage = Join-Path $temporaryRoot "Letterier-$version-windows-x64-self-signed"

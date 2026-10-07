@@ -1,7 +1,7 @@
 import {expect,test} from 'vitest';
 import {newProject,replaceRange} from '../src/core/model';
 import {compose} from '../src/core/compose';
-import {moveBlockCaret,pickCaretCandidate} from '../src/core/caret';
+import {moveBlockCaret,moveInlineCaret,pickCaretCandidate} from '../src/core/caret';
 test('次の行への移動はページを越えて同じ本文座標へ進む',()=>{
  const p=replaceRange(newProject(),0,0,('あ'.repeat(40)+'\n').repeat(60)),layout=compose(p,()=>5);
  const last=layout.pages[0].lines.at(-1)!;
@@ -30,4 +30,21 @@ test('改行直後は区切り文字の末尾ではなく次の空行先頭へ�
     {start:3,end:3,empty:true,separator:false},
   ];
   expect(pickCaretCandidate(candidates,3,true)).toBe(2);
+});
+test('改行済み空行の同じ位置では不可視の区切り文字より空行候補を選ぶ',()=>{
+  const candidates=[
+    {start:3,end:4,empty:false,separator:true},
+    {start:3,end:3,empty:true,separator:false},
+  ];
+  expect(pickCaretCandidate(candidates,3,false)).toBe(1);
+});
+test('改ページ区切りのinline forward移動は改行とフォームフィードを一括で越える',()=>{
+  expect(moveInlineCaret('甲\n\f乙',1,1)).toBe(3);
+});
+test('改ページ区切りのinline backward移動は改行とフォームフィードを一括で戻る',()=>{
+  expect(moveInlineCaret('甲\n\f乙',3,-1)).toBe(1);
+});
+test('inline移動は通常graphemeとemojiでは既存の単位を維持する',()=>{
+  expect(moveInlineCaret('A😀B',1,1)).toBe(3);
+  expect(moveInlineCaret('A😀B',3,-1)).toBe(1);
 });

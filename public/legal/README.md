@@ -2,7 +2,7 @@
 
 便箋の上へ直接文章を書き、写真や署名を添えて、PDF・印刷まで仕上げるWindows用の手紙作成アプリです。[English](README.en.md)
 
-対象はWindows 10/11 x64、WebView2 Runtimeが必要です。UIは日本語・英語を切り替えられ、日本語の縦書き／横書きと英語の横書きに対応します。手紙や画像はPC内で処理し、通常利用にインターネット接続は不要です。現在の候補バージョンは2.0.0です。検証・配布準備中で、まだ公開していません。
+対象はWindows 10/11 x64、WebView2 Runtimeが必要です。UIは日本語・英語を切り替えられ、日本語の縦書き／横書きと英語の横書きに対応します。手紙や画像はPC内で処理し、通常利用にインターネット接続は不要です。現在の配布チャネルと公開状態は[配布手順](https://github.com/ytec-forge-commits/letterier/blob/main/distribution/README.md)に記載しています。
 
 ## はじめ方
 
@@ -46,7 +46,7 @@ npm run build:native
 
 フロントエンド生成先は `.local/frontend`、ネイティブ生成先は `.local/cargo-target` です。開発起動は `npm run tauri -- dev`。ブラウザー試験は `tests/browser/` のPlaywright CLIスクリプトを使用します。ブラウザーの保存先は検証用IndexedDBで、Windows版と共有しません。
 
-ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開し、Forge・Microsoft Store向け配布物は最終確認と署名後に公開します。
+ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](https://github.com/ytec-forge-commits/letterier/blob/main/distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開しています。
 
 ## ライセンス
 

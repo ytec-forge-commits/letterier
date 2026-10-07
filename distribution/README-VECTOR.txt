@@ -1,4 +1,4 @@
-レタリエ 2.0.0 利用者向け説明書（候補版・公開準備中）
+レタリエ 2.0.1 利用者向け説明書
 ================================
 
 1. ソフトの概要
@@ -40,7 +40,7 @@ https://ytec.cloudfree.jp/forge/contact/
    確認してから起動してください。
 
 【通常インストーラー版】
-1) Letterier-2.0.0-windows-x64-self-signed-setup.exe を実行します。
+1) Letterier-2.0.1-windows-x64-self-signed-setup.exe を実行します。
 2) 画面の案内に従ってインストールします。
 3) スタートメニューなどから「レタリエ」を起動します。
 
@@ -61,8 +61,8 @@ Windowsの「設定 → アプリ → インストールされているアプリ
 
 7. マニュアルと第三者著作物
 ---------------------------
-日本語操作マニュアル: Letterier-Manual-ja-2.0.0.pdf
-英語操作マニュアル: Letterier-Manual-en-2.0.0.pdf
+日本語操作マニュアル: Letterier-Manual-ja-2.0.1.pdf
+英語操作マニュアル: Letterier-Manual-en-2.0.1.pdf
 
 同梱する第三者コンポーネント、フォント、画像資源の著作者・ライセンス・
 利用条件は、THIRD_PARTY_NOTICES.md、ASSETS_LICENSE.md、legalフォルダーに
