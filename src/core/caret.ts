@@ -1,6 +1,26 @@
 import type {Layout,LayoutLine} from './compose';
 import {graphemes,graphemeSegmenter} from './layout';
 export interface CaretCandidate {start:number;end:number;empty:boolean;separator?:boolean}
+export function trailingInsertionPrefix(layout:Layout,vertical:boolean,pageIndex:number,lineIndex:number,offset:number):string{
+ const page=layout.pages[pageIndex],target=page&&[...page.lines,...page.caretLines][lineIndex];
+ if(!target||target.tokens.length||target.breakAfter||target.start!==offset||target.end!==offset)return '';
+ // Page visuals and fixed objects may retain blank pages after body deletion.
+ // A full final row has no spare caret line, but its text still owns this offset.
+ const last=layout.pages.flatMap(p=>p.lines).filter(l=>l.tokens.length||l.breakAfter).at(-1);
+ const emptyPage=layout.pages.findIndex(p=>[...p.lines,...p.caretLines].some(l=>!l.tokens.length&&!l.breakAfter&&l.start===offset&&l.end===offset));
+ const sourcePage=last?.breakAfter==='\f'?last.pageIndex+1:last&&!last.breakAfter?last.pageIndex:emptyPage;
+ return '\f'.repeat(Math.max(0,pageIndex-sourcePage))+'\n'.repeat(trailingLineBreaks(layout,vertical,pageIndex,lineIndex,offset));
+}
+export function trailingLineBreaks(layout:Layout,vertical:boolean,pageIndex:number,lineIndex:number,offset:number):number{
+ const page=layout.pages[pageIndex],target=page&&[...page.lines,...page.caretLines][lineIndex],anchor=page?.lines.at(-1);
+ if(!page||!target||!anchor||!page.caretLines.includes(target)||target.start!==offset||target.end!==offset)return 0;
+ // Caret-only lines share the document-end offset, but occupy distinct rows.
+ // Multiple intervals on one row (around artwork) need only one line break.
+ const coordinate=(line:LayoutLine)=>vertical?line.x:line.y;
+ let previous=coordinate(anchor),breaks=0;
+ for(const line of page.caretLines){const next=coordinate(line);if(Math.abs(next-previous)>.01){breaks++;previous=next;}if(line===target)break;}
+ return breaks;
+}
 const wordSegmenter=new Intl.Segmenter('ja',{granularity:'word'});
 export function wordDeletionRange(text:string,offset:number,direction:1|-1):{start:number;end:number}{
  offset=Math.max(0,Math.min(text.length,offset));
