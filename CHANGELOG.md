@@ -7,10 +7,11 @@
 - ツールバー折りたたみ（Ctrl+F1）と読取専用の「読み返し表示」を追加。
 - ページ下中央のアラビア数字によるページ番号、行末揃え、一括書式変更、Undo/Redo対象の一時強調、入力・カーソル移動の応答改善を追加。
 - コピー失敗時の切り取りで本文を保持。縦書き入力のCtrl+Backspace/Delete、PageUp/Down、変換対象文節の強調と取消を処理。
+- 未入力の空行をクリックした後、IME確定文字が先頭行へ戻る問題を修正。必要な改行・改ページを確定時に一括挿入し、取消時は文書を保持、Undoで空行ごと戻す。通常の文末移動後に不要な改行を追加しない。
 - 恋文ペン字は公式の再配布条件により同梱しない。
 - 検証範囲と制約は[2.1.0の確認記録](docs/NATIVE-IME-VALIDATION-20261029.md)を参照。
 
-English: adds native vertical MS-IME candidates, vertical Google conversion/Tab-expanded prediction candidates, toolbar folding, Reading view, Arabic page numbers, line-end alignment, bulk formatting and undo/redo target markers. Improves editing responsiveness and preserves text when clipboard copy fails. Google's automatic suggestions remain horizontal. Koibumi Penji is not bundled because redistribution is not permitted.
+English: adds native vertical MS-IME candidates, vertical Google conversion/Tab-expanded prediction candidates, toolbar folding, Reading view, Arabic page numbers, line-end alignment, bulk formatting and undo/redo target markers. Improves editing responsiveness, preserves text when clipboard copy fails, and keeps confirmed input on the clicked empty line with atomic undo and cancellation. Google's automatic suggestions remain horizontal. Koibumi Penji is not bundled because redistribution is not permitted.
 
 ## 2.0.1 — 改ページ境界のカーソル移動修正 / 2026-10-07
 

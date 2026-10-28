@@ -5,7 +5,7 @@ import { graphemes } from '../core/layout';
 import { type Layout,type LayoutPage } from '../core/compose';
 import { LineContent, PageArtwork } from './Paper';
 import { ObjectLayer } from './ObjectLayer';
-import {moveBlockCaret,moveInlineCaret,pickCaretCandidate,wordDeletionRange} from '../core/caret';
+import {moveBlockCaret,moveInlineCaret,pickCaretCandidate,wordDeletionRange,trailingInsertionPrefix} from '../core/caret';
 import type {HistoryHighlight} from '../core/history-highlight';
 import {textCss} from './typography';
 import {bindEditContext,type EditContextBinding} from './edit-context';
@@ -120,7 +120,15 @@ export function EditorCanvas(props:Props) {
     return()=>{for(const n of affected)delete n.dataset.historyHighlight;if(position)delete position.dataset.historyPosition;};
   },[props.historyMark,props.layout]);
   const capture=()=>{if(!composing.current){const range=readSelection();if(range){const focusHost=window.getSelection()?.focusNode?.parentElement?.closest<HTMLElement>('.page-edit');for(const binding of editContexts.current.values())binding.sync(bodyText(props.project),range);props.onSelection(range);const host=focusHost;if(host&&root.current?.contains(host))props.onPage(Number(host.dataset.pageIndex));}}};
-  const insert=(text:string,range=readSelection()??props.selection)=>{revealInsertion.current=true;if(text)preferTextEnd.current=range.start+text.length;props.onInsert(range.start,range.end,text);};
+  const insert=(text:string,range=readSelection()??props.selection,origin?:{page:number;line?:number})=>{
+    const line=window.getSelection()?.focusNode?.parentElement?.closest<HTMLElement>('.body-line');
+    const page=line?.closest<HTMLElement>('.page-edit');
+    const position=origin??(line&&page?{page:Number(page.dataset.pageIndex),line:Number(line.dataset.lineIndex)}:undefined);
+    if(text&&range.start===range.end&&range.start===bodyText(props.project).length&&position?.line!==undefined){
+      text=trailingInsertionPrefix(props.layout,props.project.settings.writingMode==='vertical',position.page,position.line,range.start)+text;
+    }
+    revealInsertion.current=true;if(text)preferTextEnd.current=range.start+text.length;props.onInsert(range.start,range.end,text);
+  };
   const inputLatest=useRef({props,insert});inputLatest.current={props,insert};
   useLayoutEffect(()=>{
     // One persistent native input connection spans every rendered page.
@@ -132,7 +140,7 @@ export function EditorCanvas(props:Props) {
         const binding=bindEditContext(host,{
           snapshot:()=>({text:bodyText(inputLatest.current.props.project),selection:readSelection()??inputLatest.current.props.selection}),
           begin:()=>{inputLatest.current.props.onCompositionChange?.(true);composing.current=true;compositionRange.current=readSelection()??inputLatest.current.props.selection;compositionPage.current=Number(window.getSelection()?.focusNode?.parentElement?.closest<HTMLElement>('.page-edit')?.dataset.pageIndex??0);compositionLine.current=Number(window.getSelection()?.focusNode?.parentElement?.closest<HTMLElement>('.body-line')?.dataset.lineIndex??0);},
-          finish:(change,selection,cancelled,previewPage)=>{flushSync(()=>{inputLatest.current.props.onCompositionChange?.(false);composing.current=false;compositionRange.current=null;const page=compositionPage.current;if(cancelled)compositionRestore.current={page,line:compositionLine.current};else if(!change&&selection.start===selection.end)preferTextEnd.current=selection.end;setCompositionRevisions(revisions=>({...revisions,[page]:(revisions[page]??0)+1,...(previewPage!==undefined&&previewPage!==page?{[previewPage]:(revisions[previewPage]??0)+1}:{})}));if(change)inputLatest.current.insert(change.text,{start:change.start,end:change.end});else inputLatest.current.props.onSelection(selection);});},
+          finish:(change,selection,cancelled,previewPage)=>{flushSync(()=>{inputLatest.current.props.onCompositionChange?.(false);composing.current=false;compositionRange.current=null;const page=compositionPage.current;if(cancelled)compositionRestore.current={page,line:compositionLine.current};else if(!change&&selection.start===selection.end)preferTextEnd.current=selection.end;setCompositionRevisions(revisions=>({...revisions,[page]:(revisions[page]??0)+1,...(previewPage!==undefined&&previewPage!==page?{[previewPage]:(revisions[previewPage]??0)+1}:{})}));if(change)inputLatest.current.insert(change.text,{start:change.start,end:change.end},{page,line:compositionLine.current});else inputLatest.current.props.onSelection(selection);});},
           abort:()=>{inputLatest.current.props.onCompositionChange?.(false);composing.current=false;compositionRange.current=null;compositionRestore.current=null;},
           insert:(start,end,text)=>flushSync(()=>inputLatest.current.insert(text,{start,end})),
         });
@@ -200,15 +208,15 @@ export function EditorCanvas(props:Props) {
       }
     }
     const vertical=props.project.settings.writingMode==='vertical',text=bodyText(props.project);
-    const move=(offset:number,targetPage?:number)=>{e.preventDefault();const from=e.shiftKey?anchor:offset,range={start:Math.min(from,offset),end:Math.max(from,offset)};props.onSelection(range);restore(range,offset<from,targetPage);const target=window.getSelection()?.focusNode?.parentElement;const host=target?.closest<HTMLElement>('.page-edit');if(host)props.onPage(Number(host.dataset.pageIndex));target?.scrollIntoView({block:'nearest',inline:'nearest'});};
+    const move=(offset:number,targetPage?:number,textEnd=false)=>{e.preventDefault();if(textEnd)preferTextEnd.current=offset;const from=e.shiftKey?anchor:offset,range={start:Math.min(from,offset),end:Math.max(from,offset)};props.onSelection(range);restore(range,offset<from,targetPage);const target=window.getSelection()?.focusNode?.parentElement;const host=target?.closest<HTMLElement>('.page-edit');if(host)props.onPage(Number(host.dataset.pageIndex));target?.scrollIntoView({block:'nearest',inline:'nearest'});};
     if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='PageUp'||e.key==='PageDown')){const target=Math.max(0,Math.min(props.layout.pages.length-1,pageIndex+(e.key==='PageDown'?1:-1)));move(target===pageIndex?(e.key==='PageDown'?text.length:0):props.layout.pages[target].start,target);return;}
     if(!e.ctrlKey&&!e.metaKey&&!e.altKey){
       const blockForward=e.key===(vertical?'ArrowLeft':'ArrowDown'),blockBackward=e.key===(vertical?'ArrowRight':'ArrowUp');
       if((blockForward||blockBackward)&&active){const result=moveBlockCaret(props.layout,vertical,pageIndex,Number(active.dataset.lineStart),focus,blockForward?1:-1,preferredInline.current);preferredInline.current=result.coordinate;move(result.offset,result.pageIndex);return;}
       const forward=e.key===(vertical?'ArrowDown':'ArrowRight'),back=e.key===(vertical?'ArrowUp':'ArrowLeft');
-      if(forward||back){preferredInline.current=undefined;if(!e.shiftKey&&anchor!==focus){move(forward?Math.max(anchor,focus):Math.min(anchor,focus));return;}move(moveInlineCaret(text,focus,forward?1:-1));return;}
+      if(forward||back){preferredInline.current=undefined;if(!e.shiftKey&&anchor!==focus){move(forward?Math.max(anchor,focus):Math.min(anchor,focus),undefined,true);return;}move(moveInlineCaret(text,focus,forward?1:-1),undefined,true);return;}
     }
-    if(e.key==='Home'||e.key==='End'){preferredInline.current=undefined;const end=e.key==='End';move(e.ctrlKey?(end?text.length:0):Number(end?(Array.from(active?.querySelectorAll<HTMLElement>('[data-token]')??[]).at(-1)?.dataset.end??active?.dataset.lineEnd):active?.dataset.lineStart));}
+    if(e.key==='Home'||e.key==='End'){preferredInline.current=undefined;const end=e.key==='End';move(e.ctrlKey?(end?text.length:0):Number(end?(Array.from(active?.querySelectorAll<HTMLElement>('[data-token]')??[]).at(-1)?.dataset.end??active?.dataset.lineEnd):active?.dataset.lineStart),undefined,end);}
   };
   const clickPaper=(e:MouseEvent<HTMLDivElement>,index:number)=>{
     if(root.current&&editContexts.current.get(root.current)?.native)root.current.focus({preventScroll:true});
@@ -242,8 +250,8 @@ export function EditorCanvas(props:Props) {
     onDragEnd={()=>{draggedText.current=null;}}
     onDragOver={e=>{e.preventDefault();e.dataTransfer.dropEffect=draggedText.current?.project===props.project&&dropOffset(e.clientX,e.clientY)!==null?(e.ctrlKey?'copy':'move'):'none';}}
     onDrop={e=>{e.preventDefault();const drag=draggedText.current;draggedText.current=null;const target=dropOffset(e.clientX,e.clientY);if(drag?.project===props.project&&target!==null)props.onTransfer?.(drag.selection.start,drag.selection.end,target,e.ctrlKey);}}
-    onCompositionStart={e=>{props.onCompositionChange?.(true);const host=(e.target as Element).closest<HTMLElement>('.page-edit');if(host)host.dataset.imeComposing='true';composing.current=true;compositionRange.current=readSelection()??props.selection;compositionPage.current=Number(host?.dataset.pageIndex??0);}}
-    onCompositionEnd={e=>{props.onCompositionChange?.(false);const host=(e.target as Element).closest<HTMLElement>('.page-edit');if(host)delete host.dataset.imeComposing;composing.current=false;const range=compositionRange.current??props.selection;compositionFinal.current=e.data;const page=compositionPage.current;setCompositionRevisions(revisions=>({...revisions,[page]:(revisions[page]??0)+1}));if(e.data)insert(e.data,range);compositionRange.current=null;}}
+    onCompositionStart={e=>{props.onCompositionChange?.(true);const host=(e.target as Element).closest<HTMLElement>('.page-edit');if(host)host.dataset.imeComposing='true';composing.current=true;compositionRange.current=readSelection()??props.selection;compositionPage.current=Number(host?.dataset.pageIndex??0);compositionLine.current=Number(window.getSelection()?.focusNode?.parentElement?.closest<HTMLElement>('.body-line')?.dataset.lineIndex??0);}}
+    onCompositionEnd={e=>{props.onCompositionChange?.(false);const host=(e.target as Element).closest<HTMLElement>('.page-edit');if(host)delete host.dataset.imeComposing;composing.current=false;const range=compositionRange.current??props.selection;compositionFinal.current=e.data;const page=compositionPage.current;setCompositionRevisions(revisions=>({...revisions,[page]:(revisions[page]??0)+1}));if(e.data)insert(e.data,range,{page,line:compositionLine.current});else compositionRestore.current={page,line:compositionLine.current};compositionRange.current=null;}}
     onPaste={e=>{e.preventDefault();insert(e.clipboardData.getData('text/plain'));}}
     onCut={e=>{const range=readSelection()??props.selection;if(range.start!==range.end){e.preventDefault();e.clipboardData.setData('text/plain',bodyText(props.project).slice(range.start,range.end));insert('',range);}}}
     onCopy={e=>{const range=readSelection();if(range&&range.start!==range.end){e.preventDefault();e.clipboardData.setData('text/plain',bodyText(props.project).slice(range.start,range.end));}}}>
