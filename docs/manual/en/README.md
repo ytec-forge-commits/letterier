@@ -1,8 +1,8 @@
 # Letterier User Manual
 
-For version 2.0.1 / Windows 10 and 11, 64-bit
+For version 2.1.0 / Windows 10 and 11, 64-bit
 
-This manual covers Letterier 2.0.1. Check the applicable instructions for the current distribution, publication, and review status. WebView2 Runtime is required.
+This manual covers Letterier 2.1.0. Check the applicable instructions for the current distribution, publication, and review status. WebView2 Runtime is required.
 
 Letterier lets you write directly on stationery, add photos or text boxes, and finish your letter as a PDF or a printed page. Letters and images stay on your computer, and ordinary use does not require an internet connection.
 
@@ -16,11 +16,33 @@ Letterier lets you write directly on stationery, add photos or text boxes, and f
 - Product page: [Letterier on Y-TEC Forge](https://ytec.cloudfree.jp/forge/en/projects/letterier/)
 - Source code: [GitHub](https://github.com/ytec-forge-commits/letterier)
 
-For the portable ZIP edition, extract the ZIP before launching `Letterier.exe` from the extracted folder. Windows may show a warning because this edition uses a self-signed certificate. For the standard installer, run `Letterier-2.0.1-windows-x64-self-signed-setup.exe` and follow the prompts. For the Microsoft Store edition, select **Install** in Microsoft Store. The portable ZIP does not include WebView2 Runtime; install the official Microsoft Runtime if it is not already present.
+For the portable ZIP edition, extract the ZIP before launching `Letterier.exe` from the extracted folder. Windows may show a warning because this edition uses a self-signed certificate. For the standard installer, run `Letterier-2.1.0-windows-x64-self-signed-setup.exe` and follow the prompts. For the Microsoft Store edition, select **Install** in Microsoft Store. The portable ZIP does not include WebView2 Runtime; install the official Microsoft Runtime if it is not already present.
 
 To uninstall the portable ZIP edition, close Letterier and delete its extracted folder. To uninstall the standard installer or Microsoft Store edition, open **Windows Settings → Apps → Installed apps**, open the menu for **Letterier**, and select **Uninstall**. Your `.binsen`, `.binsenbak`, PDF, and image files are not deleted automatically. Check them first and delete only files you no longer need.
 
 Authors, licenses, and usage terms for bundled third-party components, fonts, and image resources are documented in `THIRD_PARTY_NOTICES.md`, `ASSETS_LICENSE.md`, and the `legal` folder included with the distribution. These resources are used and distributed under their stated terms.
+
+## Unpublished development changes (2026-10-27)
+
+Under **Home → Page appearance**, **Print page numbers** places horizontal Arabic numerals (1, 2, 3...) at the bottom center of each sheet, including vertically written letters. Editing, output previews, PDF and printing share the numbers. Selecting an output range preserves original page numbers. Enabling numbers reserves at least 16 mm at the bottom for the body; documents with small margins may reflow. Existing documents keep this option off.
+
+**Align line ends** distributes extra character spacing across wrapped horizontal or vertical lines. Paragraph endings, manual line/page breaks, and the final line remain unexpanded. It inserts no spaces into the body and preserves explicit formatting. Existing documents keep this option off.
+
+Selecting a font in bulk formatting now enables **Set font**. The current page follows keyboard navigation as well as clicks. After Undo/Redo, changed text or formatting is highlighted for about five seconds; removal is shown with a position marker. The affected location is brought into view. Editing or moving the cursor clears the marker. Markers are never saved, printed, or exported to PDF.
+
+On Windows, vertical body text uses MS-IME's standard vertical candidate window. Google Japanese Input uses a vertical candidate window for normal conversion and predictions expanded with Tab, with click-to-confirm and candidate paging. Google's automatic suggestions retain the standard horizontal window. A connection failure displays an explanation and restores the previous input method. Text boxes retain their existing input method. Cancelling selected-text composition preserves the original text. Text-box preedit stays outside the document, saved data and undo history until confirmation.
+
+Undo and Redo are temporarily disabled during IME composition. Confirm with Enter or cancel with Esc to enable them again. The title bar indicates the composing state.
+
+Koibumi Penji is not bundled. Fudegurume's [official terms](https://fudegurume.jp/support/fg/qa/aboutproduct/fw_02005_26.html) prohibit redistribution and restrict PDF embedding. Reconsideration requires a separate embedding and redistribution permission.
+
+## More space on a laptop (unpublished development build, 2026-10-29)
+
+Use the chevron **Collapse toolbar** at the right end of the tabs, or Ctrl+F1, to hide the large command panel. Save, Undo/Redo and tabs remain available. Selecting a tab opens its panel; the chevron expands it too.
+
+Choose **Reading view** at the right end of the tabs or on **View** to hide tools and side panels and read the letter without editing it. Photos and text boxes remain visible. Use the footer's **Fit width**, **Whole page**, zoom buttons and page selector. With focus on the paper, PageUp/PageDown changes pages and Home/End goes to the first/last page. PDF / Print remains at the top right.
+
+**Back to editing** or Esc restores the editor's scroll position, zoom and collapsed state. If an output dialog is open, the first Esc closes that dialog. Confirm or cancel IME composition before entering Reading view. These display choices last for the current app session and are not stored in the document or undo history. Paper dimensions and printed text size do not change.
 
 ## Create your first letter
 

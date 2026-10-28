@@ -2,11 +2,11 @@ import { bodyText, paperSize, pageVisual, type Project, type TextStyle, type Flo
 import { graphemes, lineEnd } from './layout';
 import {decorationMotifLayout,illustratedTemplateIds} from './stationery-layout';
 import {resolveStationeryArtwork} from './stationery-artwork';
-export interface Token { text: string; start: number; end: number; advance: number; style: TextStyle; tcy: boolean }
+export interface Token { text: string; start: number; end: number; advance: number; style: TextStyle; tcy: boolean; gapAfterMm?: number }
 export interface LayoutLine { pageIndex: number; x: number; y: number; extent: number; spacing: number; start: number; end: number; tokens: Token[]; breakAfter?: '\n' | '\f';breakText?:string }
 export interface LayoutPage { index: number; visual: PageVisual; lines: LayoutLine[]; caretLines: LayoutLine[]; rulingTracks?: Pick<LayoutLine,'x'|'y'|'extent'|'spacing'>[]; start: number; end: number }
 export interface PlacedObject extends FloatingObject { actualX: number; actualY: number; actualPage: number }
-export interface Layout { width: number; height: number; pages: LayoutPage[]; objects: PlacedObject[]; warnings: string[] }
+export interface Layout { width: number; height: number; pages: LayoutPage[]; objects: PlacedObject[]; warnings: string[]; footerMm?:number }
 export type Measure = (text: string, style: TextStyle) => number;
 export const emMm = (style: TextStyle) => style.sizePt * 25.4 / 72;
 export const automaticRulingSpacing = (style: TextStyle) => Math.max(4,Math.ceil(emMm(style)*1.6*2)/2);
@@ -67,6 +67,7 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
   let cursor=0, pageIndex=0, trailing=false;
   do {
     const visual=pageVisual(project,pageIndex), m={...visual.ruling.margins}, minimumSpacing=visual.ruling.autoSpacing?automaticRulingSpacing(project.baseStyle):visual.ruling.spacingMm;
+    if(project.settings.showPageNumbers)m.bottom=Math.max(m.bottom,16);
     const artwork=resolveStationeryArtwork(visual.design);
     const motifs=artwork&&(artwork.primary||illustratedTemplateIds.has(artwork.id))?decorationMotifLayout(artwork.id,width,height,project.settings.writingMode,artwork.continuation).placements:[];
     const count=visual.ruling.charactersPerLine;
@@ -148,6 +149,10 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
           // line, including when it is the last available row on the page.
           if(line.breakAfter==='\n'&&tokens[end]?.text==='\f'){line.breakAfter='\f';line.breakText='\n\f';line.end=tokens[end++].end;}
         }
+        if(project.settings.justifyText&&!line.breakAfter&&end<tokens.length&&line.tokens.length>1){
+          const remaining=line.extent-line.tokens.reduce((sum,t)=>sum+t.advance,0);
+          if(remaining>.001){const gap=remaining/(line.tokens.length-1);line.tokens=line.tokens.map((t,i)=>i===line.tokens.length-1?t:{...t,advance:t.advance+gap,gapAfterMm:gap});}
+        }
         page.lines.push(line); cursor=end; page.end=line.end;
         if(line.tokens.some(t=>emMm(t.style)>spacing*0.92 || t.advance>line.extent)) warnings.add('文字サイズが罫線の間隔や本文領域を超えています。文字を小さくするか、ページ全体の罫線間隔・余白を調整してください。');
         if(line.breakAfter==='\f') { pageBreak=true; trailing=cursor===tokens.length; break; }
@@ -165,7 +170,7 @@ function pass(project: Project, tokens: Token[], objects: PlacedObject[], forced
     pageIndex++;
     if(pageIndex>=1000 && cursor<tokens.length) throw new Error('ページが多すぎます。画像の回り込み・余白を見直すか、文書を分けてください。');
   } while(cursor<tokens.length || pageIndex<minimum || trailing);
-  return {width,height,pages,objects,warnings:[...warnings]};
+  return {width,height,pages,objects,warnings:[...warnings],footerMm:project.settings.showPageNumbers?16:0};
 }
 
 function balance(project: Project, tokens: Token[], objects: PlacedObject[], measure: Measure): Layout {
@@ -226,7 +231,8 @@ export function flowAnchor(project:Project,object:Pick<FloatingObject,'id'|'anch
 export function rulingSegments(layout: Layout, pageIndex: number, vertical: boolean): {x1:number;y1:number;x2:number;y2:number}[] {
   const ruling=layout.pages[pageIndex].visual.ruling;
   if(!ruling.enabled) return [];
-  const m=ruling.margins,s=ruling.spacingMm;
+  const m={...ruling.margins},s=ruling.spacingMm;
+  if(layout.footerMm)m.bottom=Math.max(m.bottom,layout.footerMm);
   const artwork=resolveStationeryArtwork(layout.pages[pageIndex].visual.design);
   const motifs=artwork&&(artwork.primary||illustratedTemplateIds.has(artwork.id))?decorationMotifLayout(artwork.id,layout.width,layout.height,vertical?'vertical':'horizontal',artwork.continuation).placements:[];
   const decorationCuts=(cross:number):[number,number][]=>motifs.filter(b=>vertical?cross>=b.x-1&&cross<=b.x+b.width+1:cross>=b.y-1&&cross<=b.y+b.height+1).map(b=>vertical?[b.y-1,b.y+b.height+1]:[b.x-1,b.x+b.width+1]);

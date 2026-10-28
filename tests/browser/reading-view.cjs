@@ -1,0 +1,37 @@
+async page=>{
+ const startup=page.getByRole('dialog',{name:'新規作成',exact:true});if(await startup.count())await startup.getByRole('button',{name:'閉じる',exact:true}).click();
+ const area=()=>page.locator('.paper-scroll').boundingBox();
+ const body=()=>page.locator('.page-edit').allTextContents().then(v=>v.join('').replaceAll('\u200b',''));
+ await page.locator('.page-edit').first().click();await page.keyboard.insertText('最初の文章\f読み返す文章\f最後の文章');
+ const original=await body(),normal=await area();
+ await page.getByRole('button',{name:'ツールバーを折りたたむ',exact:true}).click();
+ const folded=await area();if(folded.height<normal.height+100)throw Error('Folding did not free vertical space');
+ if(await page.getByRole('button',{name:'太字',exact:true}).isVisible())throw Error('Hidden tools remain interactive');
+ await page.getByRole('tab',{name:'ホーム',exact:true}).click();
+ if(!await page.getByRole('button',{name:'太字',exact:true}).isVisible())throw Error('Tab did not reopen tools');
+ await page.getByRole('button',{name:'ツールバーを折りたたむ',exact:true}).click();
+ await page.locator('.paper-scroll').evaluate(el=>el.scrollTop=400);
+ const before=await page.locator('.paper-scroll').evaluate(el=>({top:el.scrollTop,left:el.scrollLeft}));
+ await page.getByRole('button',{name:'読み返し表示',exact:true}).click();
+ const reader=page.getByRole('region',{name:'手紙を読み返す',exact:true});await reader.waitFor();
+ const reading=await reader.boundingBox();if(reading.height<folded.height+35||reading.width<normal.width+100)throw Error('Reading did not free canvas space');
+ if(await page.locator('[contenteditable=true],.object-hit').count())throw Error('Reading still allows edits');
+ const text=await reader.locator('.page-text').allTextContents();if(text.join('').replaceAll('\u200b','')!==original)throw Error('Reading changed body');
+ await reader.focus();await page.keyboard.press('Control+z');await page.keyboard.type('x');await page.keyboard.press('Backspace');
+ if((await reader.locator('.page-text').allTextContents()).join('').replaceAll('\u200b','')!==original)throw Error('Reading keys changed body');
+ await page.getByLabel('読み返しの表示方法',{exact:true}).selectOption('page');
+ const fitting=await reader.evaluate(el=>{const a=el.getBoundingClientRect(),b=el.querySelector('.sheet-frame').getBoundingClientRect();return {area:a.height,page:b.height,width:b.width,available:el.clientWidth};});
+ if(fitting.page>fitting.area||fitting.width>fitting.available)throw Error('Fit page clips the paper');
+ await page.getByRole('button',{name:'次のページ',exact:true}).click();
+ if(await page.getByLabel('読むページ',{exact:true}).inputValue()!=='1')throw Error('Reading navigation failed');
+ const visiblePage=await reader.evaluate(el=>{const a=el.getBoundingClientRect(),b=el.querySelectorAll('.sheet-frame')[1].getBoundingClientRect();return b.top>=a.top&&b.bottom<=a.bottom;});
+ if(!visiblePage)throw Error('Whole-page navigation clips the selected page');
+ await page.screenshot({path:'output/playwright/reading-20261029-page.png'});
+ await page.keyboard.press('Escape');await page.locator('.page-edit').first().waitFor();
+ if(await body()!==original)throw Error('Leaving reading changed body');
+ if(await page.getByRole('button',{name:'太字',exact:true}).isVisible())throw Error('Collapsed state was lost');
+ const after=await page.locator('.paper-scroll').evaluate(el=>({top:el.scrollTop,left:el.scrollLeft}));if(Math.abs(after.top-before.top)>2||Math.abs(after.left-before.left)>2)throw Error('Editor scroll position was lost: '+JSON.stringify({before,after}));
+ await page.getByRole('button',{name:'ツールバーを展開する',exact:true}).click();
+ await page.getByRole('button',{name:'元に戻す',exact:true}).click();if(await body()!=='')throw Error('Reading created an Undo entry');
+ return {normal,folded,reading,fit:fitting,unchanged:true,historyPreserved:true,scrollRestored:true};
+}

@@ -15,7 +15,7 @@ export interface OriginalMaterial {readonly name:string;readonly format:'gif'|'w
 export interface Asset { readonly id: string; readonly name: string; readonly mime: string; readonly data: string;readonly original?:OriginalMaterial }
 export interface Project {
   format: 'binsen'; version: 2; id: string; title: string;
-  settings: { paper: 'A4' | 'B5' | 'POSTCARD'; orientation: 'portrait' | 'landscape'; writingMode: WritingMode; orphanControl: boolean };
+  settings: { paper: 'A4' | 'B5' | 'POSTCARD'; orientation: 'portrait' | 'landscape'; writingMode: WritingMode; orphanControl: boolean; showPageNumbers?: boolean; justifyText?: boolean };
   baseStyle: TextStyle; body: { runs: TextRun[] }; pages: PageVisual[]; continuation: PageVisual;
   objects: FloatingObject[]; assets: Record<string, Asset>; templateId: string;
 }

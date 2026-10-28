@@ -10,6 +10,8 @@
 2. 用紙上をクリックして本文を入力します。「レイアウト」の「書字方向」で横書き／縦書きを切り替えられます。
 3. 「挿入」の「写真・画像」または「文字箱」から要素を追加できます。
 4. 「PDF・印刷」でプレビュー、PDF保存、Windows印刷を確認できます。
+5. 縦書き本文へMS-IMEで入力すると、Windows標準の候補欄も縦書きで表示します。Google日本語入力は通常変換とTab展開後の候補を縦書き表示します（自動サジェスト欄は標準の横書き）。
+6. Ctrl+F1でツールバーを折りたたみ、「読み返し表示」で読取専用の広い紙面に切り替えられます。ホームのページ番号はアラビア数字でPDF・印刷に反映されます。
 
 アプリ独自の外部通信、広告、アクセス解析、クラウド同期、自動更新はありません。WebView2 Runtimeが未導入の場合のみ、WindowsインストーラーがMicrosoftのRuntime取得を案内することがあります。ネットワーク保存先やネットワークプリンターを利用者が選んだ場合は、その接続先へ対応するデータが渡ります。
 
@@ -25,6 +27,8 @@ Basic certification flow:
 2. Click the paper and enter text. **Layout → Writing direction** switches Japanese horizontal and vertical writing.
 3. Add content through **Insert → Photo / Image** or **Text box**.
 4. Open **PDF / Print** to review the preview, save PDF, or use Windows printing.
+5. MS-IME uses the standard vertical candidate window for vertical body input. Google Japanese Input uses vertical conversion and Tab-expanded prediction candidates; automatic suggestions remain horizontal.
+6. Ctrl+F1 folds the toolbar. Reading view provides a larger, read-only paper area. Home's page numbers use Arabic numerals and appear in PDF/print output.
 
 The app has no application-specific external communication, advertising, analytics, cloud sync, or updater. If Microsoft WebView2 Runtime is missing, the Windows installer may direct the user to Microsoft's runtime acquisition flow. A network storage location or printer selected by the user receives the corresponding data.
 

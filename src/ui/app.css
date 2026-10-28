@@ -1,6 +1,10 @@
 :root { font-family:'Letarie Bundled Klee One','Yu Gothic UI','Meiryo',sans-serif; color:#263b34; background:#edece6; font-synthesis:none; }
 * { box-sizing:border-box; }
 body { margin:0; }
+.native-ime-caret { position:fixed;height:2px;background:#263b34;pointer-events:none;z-index:80;animation:native-caret-blink 1s steps(1) infinite; }
+@keyframes native-caret-blink { 50% { opacity:0; } }
+@media(prefers-reduced-motion:reduce) { .native-ime-caret { animation:none; } }
+@media print { .native-ime-caret { display:none!important; } }
 button,input,select { font:inherit; }
 button { border:1px solid #d8ded7; background:#fffefa; color:#294739; border-radius:7px; padding:9px 13px; cursor:pointer; min-height:42px; }
 button:hover { background:#ecf2e9; border-color:#8ea795; }
@@ -39,6 +43,8 @@ input,select { min-width:0; max-width:100%; border:1px solid #cdd5cb; border-rad
 .template-grid { grid-auto-rows:minmax(225px,auto); }.template-grid button { height:max-content;min-height:225px;overflow:hidden; }
 .font-trigger { text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-wrap:anywhere; }.font-trigger span { font-size:11px;white-space:nowrap;opacity:.7; }.font-picker { display:grid;grid-template-columns:1fr 1fr;gap:25px;height:55vh; }.font-list-area { display:flex;flex-direction:column;min-height:0; }.font-list-area .field { flex-shrink:0; }.font-list { overflow:auto; }.font-group { display:flex;flex-direction:column;gap:5px;margin-bottom:22px; }.font-group h3,.font-recommended { font-size:15px;margin:10px 0; }.font-recommended { border-top:1px solid #cdd7c8;padding-top:18px; }.font-group button { text-align:left;min-height:42px; }.font-sample-area { border-radius:9px;background:#fffefa;border:1px solid #dce1d5;padding:22px;overflow:auto; }.font-sample { font-size:24px!important;line-height:1.9!important;overflow-wrap:anywhere; }.license-text { white-space:pre-wrap;font:13px/1.7 monospace;background:#f1f3ec;padding:18px;max-height:45vh;overflow:auto; }
 .page-edit[data-writing-mode=vertical],.page-edit[data-writing-mode=vertical] .body-line { text-orientation:upright; }
+.page-edit::highlight(letterier-ime-target) { background:#dce9bd;color:#172d24;text-decoration:underline;text-decoration-thickness:2px; }
+.page-edit[data-ime-composing] ~ .paper-placeholder,.paper-scroll[data-ime-composing] .paper-placeholder { display:none; }
 .theme-picker { border:0;padding:0;margin:0 0 17px; }.theme-picker legend { color:#5b6c5e;font-size:12px;margin-bottom:7px; }.theme-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:270px;overflow:auto;padding:2px; }.theme-grid button { min-height:0;padding:5px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }.theme-preview { display:block;position:relative;height:44px;margin:-1px -1px 5px;border:1px solid #d6ddd3;border-radius:4px;overflow:hidden; }.theme-preview>span { position:absolute;right:7px;bottom:7px;width:25px;height:10px;border-radius:999px;box-shadow:0 0 0 2px #ffffffaa; }
 .font-scope-actions { margin:-4px 0 20px;padding:12px;background:#f1f5ed;border:1px solid #d5dfd1;border-radius:8px; }.font-scope-actions p { margin:0 0 9px;font-size:12px;color:#526657; }.font-scope-actions .wide { text-align:left; }
 .getting-started { background:#eef4e9; border:1px solid #c5d8c2; border-radius:10px; padding:14px 16px; margin-bottom:22px; }.getting-started h3 { margin:0 0 8px; font-size:17px; }.getting-started ol { margin:0; padding-left:24px; line-height:1.9; }.getting-started p { margin:9px 0 0; font-weight:600; }.large-setting { padding:12px; border:1px solid #cbd9c8; border-radius:9px; margin:0 0 20px; }.large-setting span { display:flex; flex-direction:column; }.large-setting strong { font-size:15px; }.large-setting small { color:#56695a; font-size:13px; }.modal summary { cursor:pointer; font-weight:700; padding:10px 0; }.modal details p { margin-top:0; }
@@ -62,3 +68,13 @@ input,select { min-width:0; max-width:100%; border:1px solid #cdd5cb; border-rad
   .template-detail>label:not(.check-label) select { display:block;width:100%;margin-top:5px; }
   .template-apply-scope select { max-width:100%; }
 }
+
+/* Transient history feedback belongs only to the editable surface. */
+.page-edit [data-history-highlight] { background:#ffe4a3;box-shadow:0 0 0 1px #c88729; }
+.page-edit [data-history-position] { position:relative; }
+.page-edit [data-history-position]::after { content:"";position:absolute;inset-inline-start:0;inset-block-start:0;inline-size:3px;block-size:1em;background:#a65d16;box-shadow:0 0 0 2px #ffe4a3;pointer-events:none; }
+.page-edit [data-history-position=end]::after { inset-inline-start:auto;inset-inline-end:0; }
+@media print { .page-edit [data-history-highlight] { background:transparent;box-shadow:none; }.page-edit [data-history-position]::after { display:none; } }
+
+.paper-scroll:focus { outline:none; }
+.paper-scroll:focus-visible { outline:2px solid #bc874c; outline-offset:-2px; }
