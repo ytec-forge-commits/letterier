@@ -1,0 +1,4 @@
+async page=>{
+ const startup=page.getByRole('dialog',{name:'新規作成',exact:true});if(await startup.count())await startup.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('tab',{name:'レイアウト',exact:true}).click();await page.getByLabel('書字方向',{exact:true}).selectOption('vertical');await page.locator('.page-edit').first().click();await page.keyboard.insertText('前\f後');await page.locator('.page-edit').last().click();await page.keyboard.press('Control+a');await page.keyboard.insertText('A');
+ const visible=await page.locator('.page-edit [data-token]').first().evaluate(el=>{const r=el.getBoundingClientRect(),area=el.closest('.paper-scroll').getBoundingClientRect();return r.top>=area.top&&r.bottom<=area.bottom&&r.left>=area.left&&r.right<=area.right;});if(!visible)throw Error('Plain replacement left the insertion caret outside the viewport');return {plainReplacementVisible:true};
+}

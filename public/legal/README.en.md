@@ -4,6 +4,10 @@ A local Windows application for writing letters directly on stationery, arrangin
 
 Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface switches between Japanese and English. Japanese horizontal and vertical writing and English horizontal writing are supported. Letters and images stay on the PC during normal use. The current distribution channels and their status are documented in [distribution information](https://github.com/ytec-forge-commits/letterier/blob/main/distribution/README.md).
 
+## Editing in 2.1.0
+
+Vertical body input uses MS-IME's standard vertical candidate window. Google Japanese Input displays conversion and Tab-expanded prediction candidates vertically; automatic suggestions remain horizontal. Collapse the toolbar with Ctrl+F1 or use Reading view for more space. Home's Print page numbers adds bottom-centered Arabic numerals (1, 2, 3...) to the paper, PDF and print output. Line-end alignment, bulk body formatting and temporary undo/redo target markers are available. Confirm or cancel IME composition before using Undo or Redo.
+
 ## Use
 
 Use the startup **New letter** dialog or **Home → New letter**, choose stationery, click the paper and type. Twenty designs are available; line width can change near artwork to avoid overlapping it. A4, B5 and postcard sizes are available. Text flows between pages and around positioned objects. Choose a default font before writing, format a selection, or apply formatting to one page or the whole letter. Add an image with **Insert → Photo / Image** or **Text box**. Objects support movement, resizing, rotation, opacity, stacking and flow/page anchoring. Each text box can use horizontal or vertical writing independently.

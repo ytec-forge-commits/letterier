@@ -1,0 +1,5 @@
+async page=>{
+ const startup=page.getByRole('dialog',{name:'新規作成',exact:true});if(await startup.count())await startup.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('tab',{name:'レイアウト',exact:true}).click();await page.getByLabel('書字方向',{exact:true}).selectOption('vertical');await page.locator('.page-edit').first().click();await page.keyboard.insertText('前\f後');await page.keyboard.press('Control+a');
+ await page.evaluate(()=>{const s=getSelection(),host=s.focusNode.parentElement.closest('.page-edit'),ec=host.editContext??host.closest('.paper-scroll').editContext,start=ec.selectionStart,end=ec.selectionEnd,text='置換';ec.updateText(start,end,text);ec.updateSelection(start+text.length,start+text.length);ec.dispatchEvent(new TextUpdateEvent('textupdate',{updateRangeStart:start,updateRangeEnd:end,text,selectionStart:ec.selectionStart,selectionEnd:ec.selectionEnd}));});
+ const body=(await page.locator('.page-edit').allTextContents()).join('').replaceAll('\u200b','');if(body!=='置換')throw Error('Logical focus input context did not replace the cross-page selection: '+body);return {crossPageNativeTargetPrepared:true};
+}

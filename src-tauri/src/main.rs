@@ -6,6 +6,7 @@ mod printers;
 mod images;
 mod activation;
 mod window_state;
+mod native_ime;
 use tauri::Manager;
 #[tauri::command]
 async fn close_app(app:tauri::AppHandle)->Result<(),String>{window_state::save(&app);app.exit(0);Ok(())}
@@ -32,11 +33,12 @@ fn main() {
                 window_state::remember(window.app_handle());
             }
         })
-        .invoke_handler(tauri::generate_handler![close_app,activation::take_launch_document,images::decode_heif,fonts::installed_fonts,printers::list_printers,printers::printer_area,output::export_pdf, output::print_document, output::qa_export_pdf, storage::open_document,storage::save_document,storage::local_read,storage::local_write,storage::local_remove])
+        .invoke_handler(tauri::generate_handler![native_ime::native_ime,close_app,activation::take_launch_document,images::decode_heif,fonts::installed_fonts,printers::list_printers,printers::printer_area,output::export_pdf, output::print_document, output::qa_export_pdf, storage::open_document,storage::save_document,storage::local_read,storage::local_write,storage::local_remove])
         .build(tauri::generate_context!())
         .expect("レタリエを起動できませんでした。")
         .run(|app,event|{
             if matches!(event,tauri::RunEvent::ExitRequested { .. }) { window_state::save(app); }
+            if matches!(event,tauri::RunEvent::Exit) { native_ime::shutdown(); }
         })
         ;
 }

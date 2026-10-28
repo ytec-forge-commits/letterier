@@ -1,6 +1,7 @@
 const noStart = new Set(Array.from('、。，．・：；？！‼⁇⁈⁉ー〜～…‥）〕］｝〉》」』】〙〗〟’”»ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々ヽヾゝゞ'));
 const noEnd = new Set(Array.from('（〔［｛〈《「『【〘〖〝‘“«'));
-export const graphemes = (text: string) => Array.from(new Intl.Segmenter('ja', { granularity: 'grapheme' }).segment(text), s => s.segment);
+export const graphemeSegmenter=new Intl.Segmenter('ja', { granularity: 'grapheme' });
+export const graphemes = (text: string) => Array.from(graphemeSegmenter.segment(text), s => s.segment);
 
 export function lineEnd<T extends { text: string; advance: number }>(units: T[], start: number, extent: number, preferWordBoundary=false): number {
   let end = start;

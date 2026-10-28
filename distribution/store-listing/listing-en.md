@@ -32,7 +32,7 @@ Letterier has no account, advertising, analytics, or cloud sync. Documents, imag
 
 ## What's new
 
-Version 2.0.1 fixes caret and IME display when clicking an empty line after a newline or page break, and avoids file-drop interference when dragging selected body text to move or copy it in Windows. The Japanese and English manual PDFs are synchronized to 2.0.1.
+Version 2.1.0 adds vertical MS-IME candidates and vertical Google Japanese Input conversion/Tab-expanded prediction candidates. Toolbar folding and Reading view provide more space for letters. It also adds bottom-centered Arabic page numbers, line-end alignment, bulk body formatting, undo/redo target markers and editing responsiveness improvements. Google's automatic suggestions remain horizontal.
 
 Version 2.0.0 adds reusable personal stationery, drag-to-position backgrounds, a target line-length setting, and font-size-aware automatic rules. Adjust character spacing and the default body size, use the bottom-right zoom slider, recognize Save by its floppy-disk icon, and find clearer paragraph controls. Dismissible screens close on outside clicks, and the output dialog prioritizes printing. The next launch restores the saved window size. Japanese and English manuals have been updated.
 

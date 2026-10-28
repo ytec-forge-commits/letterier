@@ -3,6 +3,19 @@ import {useLayoutEffect} from 'react';
 export type UiLanguage='ja'|'en';
 
 const translations:Record<string,string>={
+  'クリップボードへコピーできませんでした。選択した文字はそのまま残しています。':'Could not copy to the clipboard. The selected text has been preserved.',
+  'Windowsの縦書き入力に接続できなかったため、従来の入力方式へ戻しました。':'Could not connect to Windows vertical input. The previous input method has been restored.',
+  '読み返し表示':'Reading view','読み返し表示に切り替える':'Switch to reading view',
+  'ツールバーを展開する':'Expand toolbar','ツールバーを折りたたむ':'Collapse toolbar',
+  'ツールバーを展開する（Ctrl+F1）':'Expand toolbar (Ctrl+F1)','ツールバーを折りたたむ（Ctrl+F1）':'Collapse toolbar (Ctrl+F1)',
+  '手紙を読み返す':'Read the letter','読み返し中（編集できません）':'Reading (editing is disabled)',
+  '編集に戻る':'Back to editing','編集に戻る（Esc）':'Back to editing (Esc)',
+  '読み返すページ':'Reading navigation','読むページ':'Page to read','前のページ':'Previous page','次のページ':'Next page',
+  '読み返しの表示方法':'Reading zoom mode','幅に合わせる':'Fit width','ページ全体':'Whole page',
+  '読み返しを縮小':'Zoom reading out','読み返しを拡大':'Zoom reading in',
+  '紙面':'Page appearance','ページ番号を印刷':'Print page numbers','行末を揃える':'Align line ends',
+  '折り返した行の文字間隔を調整します。段落末と手動改行の行は広げません。':'Adjust character spacing in wrapped lines. Paragraph endings and manual line breaks are not expanded.',
+  '書式を適用できませんでした。文字サイズや余白を確認してください。':'Could not apply formatting. Check the text size and margins.',
   '文字間隔（pt）':'Character spacing (pt)',
   '本文の標準サイズ（pt）':'Default body size (pt)',
   '段落の最初・最後の1行を別ページに分けない':'Keep first and last paragraph lines together',
@@ -60,7 +73,7 @@ const translations:Record<string,string>={
   '書き進めると、自動で続きのページが生まれます。':'A new page is added automatically as you continue writing.',
   'ここから次のページ':'Start a new page here','複製・移動・削除…':'Duplicate, move, or delete…','背景・罫線・余白…':'Background, rules, and margins…',
   '配置した要素':'Placed items','追従':'Flows with text','固定':'Fixed','表示':'View','表示倍率':'Zoom level',
-  'ページ':'Page','文字':' characters','ページ · 100%表示は画面により実寸と異なります':' pages · 100% zoom may differ from physical size','手紙の本文':'Letter body','ここから、お手紙を。':'Start your letter here.',
+  'ページ':'Page','文字':' characters','ページ · 100%表示は画面により実寸と異なります':' pages · 100% zoom may differ from physical size','手紙の本文':'Letter body','手紙の編集領域':'Letter editing area','変換中：Enterで確定／Escで取消':'Composing: Enter to confirm / Esc to cancel','ここから、お手紙を。':'Start your letter here.',
   '標準フォント':'Default font','本文の基本フォントです。書き始める前にも選べ、個別に変更していない文字へ反映されます。':'The default font for body text. You can choose it before writing; it applies to text without individual formatting.',
   '本文の標準フォント':'Default body font','選んだフォントを一括適用':'Apply selected font','標準フォントに揃える範囲':'Apply default font to','このページ':'This page','全ページ':'All pages','このページの本文を揃える':'Apply to this page','すべての本文を揃える':'Apply to all pages',
   '選択した文字':'Selected text','文字を選んだときは、その部分だけ変更できます。選択していないときは次に入力する文字へ反映します。':'When text is selected, changes apply only to that selection. Otherwise they apply to the next text you type.','選択部分のフォント':'Selection font','選ぶ…':'Choose…',
@@ -183,6 +196,9 @@ export function useDomLocalization(language:UiLanguage){
     let queued=false;
     const apply=()=>{queued=false;localizeDom(root,language);};
     apply();
+    // React already writes Japanese source strings. After restoring a language
+    // switch, Japanese edits need no observer or full-document translation pass.
+    if(language==='ja')return;
     const observer=new MutationObserver(()=>{if(!queued){queued=true;queueMicrotask(apply);}});observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['aria-label','title','placeholder']});
     return()=>observer.disconnect();
   },[language]);

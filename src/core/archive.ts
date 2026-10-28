@@ -66,7 +66,7 @@ export function validateProject(value: unknown): Project {
   const refs=[...pages,continuation].map(p=>p.background.assetId).concat(objects.filter(o=>o.kind==='image').map(o=>o.assetId));
   if(refs.some(id=>id&&!Object.hasOwn(assets,id)))throw error();
   if(new Set(objects.map(o=>o.id)).size!==objects.length)throw error();
-  return ensureStationeryMargins({format:'binsen',version:2,id:key(p.id),title:string(p.title,200),settings:{paper:choice(settings.paper,['A4','B5','POSTCARD']),orientation:choice(settings.orientation,['portrait','landscape']),writingMode:choice(settings.writingMode,['horizontal','vertical']),orphanControl:bool(settings.orphanControl)},baseStyle:style(p.baseStyle) as TextStyle,body:{runs},pages,continuation,objects,assets,templateId:key(p.templateId)});
+  return ensureStationeryMargins({format:'binsen',version:2,id:key(p.id),title:string(p.title,200),settings:{paper:choice(settings.paper,['A4','B5','POSTCARD']),orientation:choice(settings.orientation,['portrait','landscape']),writingMode:choice(settings.writingMode,['horizontal','vertical']),orphanControl:bool(settings.orphanControl),...(settings.showPageNumbers===undefined?{}:{showPageNumbers:bool(settings.showPageNumbers)}),...(settings.justifyText===undefined?{}:{justifyText:bool(settings.justifyText)})},baseStyle:style(p.baseStyle) as TextStyle,body:{runs},pages,continuation,objects,assets,templateId:key(p.templateId)});
 }
 
 export function base64Bytes(value:string):Uint8Array {

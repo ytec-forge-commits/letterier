@@ -1,0 +1,32 @@
+async page=>{
+ const startup=page.getByRole('dialog',{name:'新規作成',exact:true});if(await startup.count())await startup.getByRole('button',{name:'閉じる',exact:true}).click();
+ await page.getByRole('tab',{name:'レイアウト',exact:true}).click();await page.getByLabel('書字方向',{exact:true}).selectOption('vertical');
+ await page.locator('.page-edit').first().click();await page.keyboard.insertText('縦書きの文章\f二枚目\f三枚目');
+ const cdp=await page.context().newCDPSession(page);await cdp.send('Input.imeSetComposition',{text:'にほん',selectionStart:3,selectionEnd:3});
+ const start=page.getByRole('button',{name:'読み返し表示',exact:true});if(!await start.isDisabled())throw Error('Reading can interrupt active IME');
+ await cdp.send('Input.insertText',{text:'日本'});await cdp.detach();
+ await page.evaluate(()=>{window.__retiredContext=document.querySelector('.paper-scroll').editContext;});
+ const original=(await page.locator('.page-edit').allTextContents()).join('').replaceAll('\u200b','');
+ await page.getByRole('tab',{name:'挿入',exact:true}).click();await page.getByRole('button',{name:'文字箱',exact:true}).click();
+ const object=(await page.locator('.paper .floating-text').allTextContents()).join('');
+ await page.getByRole('tab',{name:'ホーム',exact:true}).click();await page.getByLabel('ページ番号を印刷',{exact:true}).check();
+ await start.click();const reader=page.getByRole('region',{name:'手紙を読み返す',exact:true});await reader.waitFor();
+ if(await page.locator('.right-panel,.page-thumbnails,.object-hit,[contenteditable=true]').count())throw Error('Editor tools remained in reading');
+ if((await reader.locator('.floating-text').allTextContents()).join('')!==object)throw Error('Positioned text missing from reading');
+ if((await reader.locator('.paper-page-number').allTextContents()).join(',')!=='1,2,3')throw Error('Page numbers missing from reading');
+ await page.evaluate(()=>{const ec=window.__retiredContext;if(ec){ec.updateText(0,ec.text.length,'遅延');ec.dispatchEvent(new TextUpdateEvent('textupdate',{updateRangeStart:0,updateRangeEnd:0,text:'遅延',selectionStart:2,selectionEnd:2}));}});
+ await page.getByLabel('読み返しの表示方法',{exact:true}).selectOption('width');
+ if(!await reader.evaluate(el=>el.querySelector('.sheet-frame').getBoundingClientRect().width<=el.clientWidth))throw Error('Fit width overflows');
+ await page.getByLabel('読み返しの表示方法',{exact:true}).selectOption('page');await page.getByLabel('読むページ',{exact:true}).selectOption('2');
+ await reader.focus();await page.keyboard.press('Home');if(await page.getByLabel('読むページ',{exact:true}).inputValue()!=='0')throw Error('Home navigation failed');
+ await page.keyboard.press('End');if(await page.getByLabel('読むページ',{exact:true}).inputValue()!=='2')throw Error('End navigation failed');
+ await page.getByRole('button',{name:'PDF・印刷',exact:true}).click();const output=page.getByRole('dialog',{name:'PDF・印刷の確認',exact:true});await output.waitFor();
+ if((await output.locator('.paper-page-number').allTextContents()).join(',')!=='1,2,3')throw Error('Reading output changed numbering');
+ await page.keyboard.press('Escape');await output.waitFor({state:'detached'});if(!await reader.isVisible())throw Error('Dialog Escape also exited reading');
+ await page.screenshot({path:'output/playwright/reading-20261029-vertical.png'});
+ await page.getByRole('button',{name:'編集に戻る',exact:true}).click();
+ if((await page.locator('.page-edit').allTextContents()).join('').replaceAll('\u200b','')!==original)throw Error('Late IME event changed saved body');
+ await page.keyboard.press('Control+F1');if(await page.getByRole('button',{name:'ツールバーを展開する',exact:true}).getAttribute('aria-expanded')!=='false')throw Error('Folding shortcut failed');
+ await page.keyboard.press('Control+F1');if(!await page.getByRole('button',{name:'太字',exact:true}).isVisible())throw Error('Expand shortcut failed');
+ return {vertical:true,objects:true,numbers:true,lateInputIgnored:true,compositionGuard:true,output:true,keyboard:true};
+}
