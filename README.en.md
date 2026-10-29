@@ -4,13 +4,16 @@ A local Windows application for writing letters directly on stationery, arrangin
 
 Windows 10/11 x64 and Microsoft WebView2 Runtime are required. The interface switches between Japanese and English. Japanese horizontal and vertical writing and English horizontal writing are supported. Letters and images are processed locally; normal use requires no internet connection.
 
-This update is **2.1.0**. Check each distribution channel for its publication or Store submission status. See the [English user manual](docs/manual/en/README.md) for illustrated instructions.
+The current public release is **2.1.0** (checked October 29, 2026). Microsoft Store and the Forge portable edition are available. Version 2.1.0 has been submitted to Vector and is awaiting publication.
 
-The following describes the earlier 1.0.4 review. Review folders and SHA-256 identify them separately from earlier official artifacts with the same version number. Mixed-size field input and upright vertical PDF text were fixed; Windows saving, explicit recovery, and thirteen multi-paper PDFs (twenty-five pages) were checked. See the [save](docs/SAVE-RECOVERY-VALIDATION.md) and [output](docs/NATIVE-OUTPUT-VALIDATION.md) records for scope and unverified scenarios. This does not attest to physical printing, the OS-close unsaved guard, or completion of the full independent review.
+- [Official page and downloads](https://ytec.cloudfree.jp/forge/en/projects/letterier/)
+- [Microsoft Store](https://apps.microsoft.com/detail/9NQVWSFS92R8)
+- [English PDF manual](https://ytec.cloudfree.jp/forge/downloads/letterier/letterier-manual-en-2.1.0.pdf) / [Japanese PDF manual](https://ytec.cloudfree.jp/forge/downloads/letterier/letterier-manual-ja-2.1.0.pdf)
+- [Introduction](https://youtu.be/7EzBFi0zH6s) / [User guide](https://youtu.be/otb0kyJATos) (Japanese captions)
 
 Letterier is freeware; its original source code is licensed under Apache License 2.0. It supports 64-bit Windows 10 and 11 and uses Microsoft WebView2 Runtime. See the [distribution information](distribution/README-VECTOR.txt) for installation, removal, third-party works, and author contact details. Support is available through [Y-TEC Forge contact](https://ytec.cloudfree.jp/forge/en/contact/).
 
-## Unpublished development changes (2026-10-27)
+## Changes in 2.1.0
 
 Under **Home → Page appearance**, **Print page numbers** places horizontal page numbers at the bottom center of each sheet. Editing, output previews, PDF and printing share the numbers. Selecting an output range preserves original page numbers. Enabling numbers reserves at least 16 mm at the bottom for the body; documents with small margins may reflow. Existing documents keep this option off.
 
@@ -52,7 +55,7 @@ Ctrl+S saves, Ctrl+Shift+S saves as, Ctrl+Z undoes, Ctrl+Y redoes, and Ctrl+Ente
 
 Twenty handwriting fonts are bundled. Installed Windows fonts can also be used; missing font names are preserved while a fallback is displayed. Image support includes raster images, a static SVG subset, GIF/WebP frame selection, flattened 8-bit RGB PSD, PDF-compatible AI/PDF page selection, and HEIC when Windows codecs support it. See [format details](IMAGE-FORMATS.md). Text, rulings, and static SVG remain vector in PDF. Generated stationery motifs and imported raster artwork are embedded as images; Letterier does not flatten the whole sheet into one image. Imported AI/PDF pages are rasterized. Word files, PSD layer editing, cloud sync and mobile use are outside scope.
 
-## More space on a laptop (unpublished development build)
+## More space on a laptop
 
 Use **Collapse toolbar** at the right end of the tabs, or Ctrl+F1, to hide the large command panel. Save, Undo/Redo and tabs remain available. Choosing a tab opens its panel again.
 
@@ -72,6 +75,10 @@ npm run build:native
 
 Run development with `npm run tauri -- dev`. Outputs are `.local/frontend` and `.local/cargo-target`. Browser regression scripts are under `tests/browser`; browser IndexedDB is test storage separate from Windows app data. Generate notices with `python scripts/collect-licenses.py` after fetching dependencies. Pinned fonts and PDF resources are already local; acquisition scripts are under `scripts/`.
 
-See [distribution](distribution/README.md) for Store and direct-download preparation. Source is public on [GitHub](https://github.com/ytec-forge-commits/letterier); Forge and Microsoft Store distribution remain pending final review.
+See [distribution](distribution/README.md) for Store and direct-download preparation. Source is public on [GitHub](https://github.com/ytec-forge-commits/letterier); version 2.1.0 is publicly available from Forge and Microsoft Store. See the [native IME validation record](docs/NATIVE-IME-VALIDATION-20261029.md) for the scope of the Windows checks.
+
+## Historical validation
+
+The following describes the earlier 1.0.4 review. Review folders and SHA-256 identify them separately from earlier official artifacts with the same version number. Mixed-size field input and upright vertical PDF text were fixed; Windows saving, explicit recovery, and thirteen multi-paper PDFs (twenty-five pages) were checked. See the [save](docs/SAVE-RECOVERY-VALIDATION.md) and [output](docs/NATIVE-OUTPUT-VALIDATION.md) records for scope and unverified scenarios. This does not attest to physical printing, the OS-close unsaved guard, or completion of the full independent review.
 
 Original code is [Apache-2.0](LICENSE). [Third-party notices](THIRD_PARTY_NOTICES.md), [asset terms](ASSETS_LICENSE.md), [brand policy](BRAND_POLICY.md), [scope exceptions](LICENSE_EXCEPTIONS.md), [privacy](PRIVACY.md), and the [code-signing policy](CODE_SIGNING_POLICY.md) apply separately. Full notices and unmodified MPL corresponding source are included in `public/legal/` and the distribution's legal directory.
