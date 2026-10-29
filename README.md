@@ -4,9 +4,12 @@
 
 対象はWindows 10/11 x64、WebView2 Runtimeが必要です。UIは日本語・英語を切り替えられ、日本語の縦書き／横書きと英語の横書きに対応します。手紙や画像はPC内で処理し、通常利用にインターネット接続は不要です。
 
-今回の更新版は **2.1.0** です。公開・Store申請の状態は各配布先で確認してください。詳しい手順は[日本語操作マニュアル](docs/manual/ja/README.md)をご覧ください。
+最新の公開版は **2.1.0** です（2026年10月29日確認）。Microsoft Store版とForgeのポータブル版を公開済みです。Vectorは2.1.0への更新を申請済みで、公開待ちです。
 
-以下は先行1.0.4改修版の検証記録です。同じ1.0.4表記の過去の正式配布物とは、確認用フォルダーとSHA-256で区別します。混在サイズ欄の入力と縦書きPDFの英数字の向きを修正し、Windowsの保存・明示回復、複数用紙の13 PDF・25ページを検証しました。実施範囲と未確認事項は[保存](docs/SAVE-RECOVERY-VALIDATION.md)・[出力](docs/NATIVE-OUTPUT-VALIDATION.md)の検証記録をご覧ください。実印刷・OS終了時の未保存ガード・全変更の独立レビュー完了を意味しません。
+- [公式紹介ページ・ダウンロード](https://ytec.cloudfree.jp/forge/projects/letterier/)
+- [Microsoft Store](https://apps.microsoft.com/detail/9NQVWSFS92R8)
+- [日本語PDFマニュアル](https://ytec.cloudfree.jp/forge/downloads/letterier/letterier-manual-ja-2.1.0.pdf)・[英語PDFマニュアル](https://ytec.cloudfree.jp/forge/downloads/letterier/letterier-manual-en-2.1.0.pdf)
+- [紹介動画](https://youtu.be/7EzBFi0zH6s)・[使い方動画](https://youtu.be/otb0kyJATos)
 
 本ソフトは無料で利用できるフリーソフトで、本体コードはApache License 2.0です。Windows 10・11（64ビット）へ対応し、Microsoft WebView2 Runtimeを使用します。導入・削除方法、第三者著作物、作者への連絡先をまとめた[利用者向け説明書](distribution/README-VECTOR.txt)もご覧ください。お問い合わせは[Y-TEC Forge お問い合わせ](https://ytec.cloudfree.jp/forge/contact/)へお願いします。
 
@@ -29,7 +32,7 @@
 
 印刷の初期設定は「紙面全体を印刷可能範囲へ縮小」です。プレビューの「印刷」は選択中の倍率と印刷できない余白を表示し、点線は出力しません。「実寸」を選ぶと、プリンターが印刷できない用紙端の飾りは切れます。「PDF（実寸）」のプレビューとPDF保存は、この縮小設定にかかわらず実寸です。
 
-## 未公開の開発版の追加・改善（2026-10-27）
+## 2.1.0の追加・改善
 
 「ホーム → 紙面」の「ページ番号を印刷」で、各用紙の下中央に横向きのページ番号を表示します。編集画面・出力プレビュー・PDF・印刷で共通の番号を使い、ページ範囲を選んでも元のページ番号を維持します。番号をONにしたときは本文の下端に16mm以上を確保するため、余白が小さい文書では改ページが変わる場合があります。既存文書ではOFFです。
 
@@ -63,7 +66,7 @@ Ctrl+S 保存 / Ctrl+Shift+S 名前を付けて保存 / Ctrl+Z 元に戻す / Ct
 
 本文・罫線・静的SVGはベクターPDFとして出力します。生成した便箋モチーフと写真などのラスター素材だけを画像として埋め込み、便箋全体を1枚の画像にはしません。PDF互換素材は画像へ変換します。Word形式、PSDレイヤー編集、クラウド同期、スマートフォン版は対象外です。
 
-## ノートPCで広く書く・読み返す（未公開の開発版）
+## ノートPCで広く書く・読み返す
 
 タブ右端の「ツールバーを折りたたむ」（Ctrl+F1）で、大きな操作パネルを隠せます。保存・元に戻す・タブは残り、タブを押すと操作パネルが再び開きます。
 
@@ -83,7 +86,11 @@ npm run build:native
 
 フロントエンド生成先は `.local/frontend`、ネイティブ生成先は `.local/cargo-target` です。開発起動は `npm run tauri -- dev`。ブラウザー試験は `tests/browser/` のPlaywright CLIスクリプトを使用します。ブラウザーの保存先は検証用IndexedDBで、Windows版と共有しません。
 
-ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開しています。確認用ビルドと正式配布物を区別し、Forge・Microsoft Store向け配布は完成確認、署名、配布検査後に行います。
+ライセンス生成は `python scripts/collect-licenses.py`、フォント・PDF資源の取得は `scripts/acquire-fonts.py` と `scripts/acquire-pdf-assets.py`。通常ビルドは同梱済み資源を使います。[配布手順](distribution/README.md)にStore版と直接配布版の準備・署名境界を記載しています。ソースは[GitHub](https://github.com/ytec-forge-commits/letterier)で公開しています。2.1.0の実機・出力確認の範囲は[縦書きIMEの検証記録](docs/NATIVE-IME-VALIDATION-20261029.md)を参照してください。今後の配布物も完成確認、署名、配布検査後に公開します。
+
+## 過去の検証記録
+
+以下は先行1.0.4改修版の検証記録です。同じ1.0.4表記の過去の正式配布物とは、確認用フォルダーとSHA-256で区別します。混在サイズ欄の入力と縦書きPDFの英数字の向きを修正し、Windowsの保存・明示回復、複数用紙の13 PDF・25ページを検証しました。実施範囲と未確認事項は[保存](docs/SAVE-RECOVERY-VALIDATION.md)・[出力](docs/NATIVE-OUTPUT-VALIDATION.md)の検証記録をご覧ください。実印刷・OS終了時の未保存ガード・全変更の独立レビュー完了を意味しません。
 
 ## ライセンス
 
